@@ -1,5 +1,12 @@
 package com.cmlteam.s3mycloud.services;
 
+import com.amazonaws.HttpMethod;
+import com.amazonaws.auth.AWSStaticCredentialsProvider;
+import com.amazonaws.auth.BasicAWSCredentials;
+import com.amazonaws.client.builder.AwsClientBuilder;
+import com.amazonaws.services.s3.AmazonS3;
+import com.amazonaws.services.s3.AmazonS3ClientBuilder;
+import com.amazonaws.services.s3.model.GeneratePresignedUrlRequest;
 import com.cmlteam.s3mycloud.S3Props;
 import com.cmlteam.util.Util;
 import lombok.extern.slf4j.Slf4j;
@@ -17,6 +24,7 @@ import software.amazon.awssdk.services.s3.model.S3Object;
 import javax.annotation.PostConstruct;
 import java.io.File;
 import java.net.URI;
+import java.net.URL;
 
 @Service
 @Slf4j
@@ -24,6 +32,7 @@ public class S3Service {
   private final S3Props s3Props;
 
   private S3Client s3Client;
+  private AmazonS3 s3ClientV1;
 
   @Autowired
   public S3Service(S3Props s3Props) {
@@ -40,8 +49,20 @@ public class S3Service {
             .credentialsProvider(
                 () -> AwsBasicCredentials.create(s3Props.getAccessKey(), s3Props.getSecretKey()))
             .build();
+
+    s3ClientV1 =
+        AmazonS3ClientBuilder.standard()
+            .withEndpointConfiguration(
+                new AwsClientBuilder.EndpointConfiguration(
+                    s3Props.getEndpoint(), s3Props.getRegion()))
+            .withCredentials(
+                new AWSStaticCredentialsProvider(
+                    new BasicAWSCredentials(s3Props.getAccessKey(), s3Props.getSecretKey())))
+            .build();
+
     //    testUpload();
-    testList();
+    //    testList();
+    testPresigned();
   }
 
   private void testUpload() {
@@ -87,5 +108,23 @@ public class S3Service {
     } while (resp.isTruncated());
 
     log.info("TOTAL: {}", Util.renderFileSize(totalSize));
+  }
+
+  private void testPresigned() {
+    // Set the presigned URL to expire after one hour.
+    java.util.Date expiration = new java.util.Date();
+    long expTimeMillis = expiration.getTime();
+    expTimeMillis += 1000 * 60 * 60;
+    expiration.setTime(expTimeMillis);
+
+    // Generate the presigned URL.
+    log.info("Generating pre-signed URL.");
+    GeneratePresignedUrlRequest generatePresignedUrlRequest =
+        new GeneratePresignedUrlRequest(s3Props.getBucket(), "test1.png")
+            .withMethod(HttpMethod.PUT)
+            .withExpiration(expiration);
+    URL url = s3ClientV1.generatePresignedUrl(generatePresignedUrlRequest);
+
+    log.info("Pre-Signed URL: {}", url.toString());
   }
 }
