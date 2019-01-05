@@ -62,7 +62,8 @@ public class S3Service {
 
     //    testUpload();
     //    testList();
-    testPresigned();
+    testListTopLevel();
+    //    testPresigned();
   }
 
   private void testUpload() {
@@ -77,16 +78,23 @@ public class S3Service {
   }
 
   private void testList() {
-    // maxKeys is set to 2 to demonstrate the use of
+    // maxKeys is set to demonstrate the use of
     // ListObjectsV2Result.getNextContinuationToken()
     int maxKeys = 50;
-    ListObjectsV2Request req =
-        ListObjectsV2Request.builder().bucket("nextcloud-xonix-1").maxKeys(maxKeys).build();
     ListObjectsV2Response resp;
 
     long totalSize = 0;
 
+    String token = null;
+
     do {
+      ListObjectsV2Request req =
+          ListObjectsV2Request.builder()
+              .bucket("nextcloud-xonix-1")
+              .continuationToken(token)
+              .maxKeys(maxKeys)
+              .build();
+
       resp = s3Client.listObjectsV2(req);
 
       for (S3Object objectSummary : resp.contents()) {
@@ -96,15 +104,44 @@ public class S3Service {
       }
       // If there are more than maxKeys keys in the bucket, get a continuation token
       // and list the next objects.
-      String token = resp.nextContinuationToken();
+      token = resp.nextContinuationToken();
       log.info("Next Continuation Token: {}", token);
-      req =
+    } while (resp.isTruncated());
+
+    log.info("TOTAL: {}", Util.renderFileSize(totalSize));
+  }
+
+  private void testListTopLevel() {
+    // maxKeys is set to demonstrate the use of
+    // ListObjectsV2Result.getNextContinuationToken()
+    int maxKeys = 50;
+    ListObjectsV2Response resp;
+
+    long totalSize = 0;
+
+    String token = null;
+
+    do {
+      ListObjectsV2Request req =
           ListObjectsV2Request.builder()
               .bucket("nextcloud-xonix-1")
+//              .prefix("")
+              .delimiter("/")
               .continuationToken(token)
               .maxKeys(maxKeys)
               .build();
 
+      resp = s3Client.listObjectsV2(req);
+
+      for (S3Object objectSummary : resp.contents()) {
+        Long size = objectSummary.size();
+        totalSize += size;
+        log.info(" - {} (size: {})", objectSummary.key(), Util.renderFileSize(size));
+      }
+      // If there are more than maxKeys keys in the bucket, get a continuation token
+      // and list the next objects.
+      token = resp.nextContinuationToken();
+      log.info("Next Continuation Token: {}", token);
     } while (resp.isTruncated());
 
     log.info("TOTAL: {}", Util.renderFileSize(totalSize));
