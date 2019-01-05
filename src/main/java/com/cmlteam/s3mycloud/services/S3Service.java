@@ -16,10 +16,7 @@ import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
 import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.s3.S3Client;
-import software.amazon.awssdk.services.s3.model.ListObjectsV2Request;
-import software.amazon.awssdk.services.s3.model.ListObjectsV2Response;
-import software.amazon.awssdk.services.s3.model.PutObjectRequest;
-import software.amazon.awssdk.services.s3.model.S3Object;
+import software.amazon.awssdk.services.s3.model.*;
 
 import javax.annotation.PostConstruct;
 import java.io.File;
@@ -125,7 +122,7 @@ public class S3Service {
       ListObjectsV2Request req =
           ListObjectsV2Request.builder()
               .bucket("nextcloud-xonix-1")
-//              .prefix("")
+              .prefix("unindentified #2/")
               .delimiter("/")
               .continuationToken(token)
               .maxKeys(maxKeys)
@@ -133,6 +130,9 @@ public class S3Service {
 
       resp = s3Client.listObjectsV2(req);
 
+      for (CommonPrefix commonPrefix : resp.commonPrefixes()) {
+        log.info(" - {}", commonPrefix.prefix());
+      }
       for (S3Object objectSummary : resp.contents()) {
         Long size = objectSummary.size();
         totalSize += size;
