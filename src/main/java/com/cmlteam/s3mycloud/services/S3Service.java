@@ -8,6 +8,9 @@ import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 import com.amazonaws.services.s3.model.GeneratePresignedUrlRequest;
 import com.cmlteam.s3mycloud.S3Props;
+import com.cmlteam.s3mycloud.model.FileObj;
+import com.cmlteam.s3mycloud.model.LsRequest;
+import com.cmlteam.s3mycloud.model.LsResponse;
 import com.cmlteam.util.Util;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,10 +25,13 @@ import javax.annotation.PostConstruct;
 import java.io.File;
 import java.net.URI;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
 
 @Service
 @Slf4j
 public class S3Service {
+  public static final int DEFAULT_LIMIT = 50;
   private final S3Props s3Props;
 
   private S3Client s3Client;
@@ -59,7 +65,7 @@ public class S3Service {
 
     //    testUpload();
     //    testList();
-    testListTopLevel();
+    //    testListTopLevel();
     //    testPresigned();
   }
 
@@ -163,5 +169,49 @@ public class S3Service {
     URL url = s3ClientV1.generatePresignedUrl(generatePresignedUrlRequest);
 
     log.info("Pre-Signed URL: {}", url.toString());
+  }
+
+  /**
+   * @param lsRequest ls request params
+   * @return list of files/folders in folder
+   */
+  public LsResponse ls(LsRequest lsRequest) {
+    List<FileObj> items = new ArrayList<>();
+
+    ListObjectsV2Response resp;
+
+    String prefix = lsRequest.getFolder();
+    if (prefix == null) prefix = "";
+
+    Integer limit = lsRequest.getLimit();
+    if (limit == null || limit == 0) limit = DEFAULT_LIMIT;
+
+    ListObjectsV2Request req =
+        ListObjectsV2Request.builder()
+            .bucket(s3Props.getBucket())
+            .prefix(prefix)
+            .delimiter("/")
+            .continuationToken(lsRequest.getNext())
+            .maxKeys(limit)
+            .build();
+
+    resp = s3Client.listObjectsV2(req);
+
+    for (CommonPrefix commonPrefix : resp.commonPrefixes()) {
+      //      log.info(" - {}", commonPrefix.prefix());
+      items.add(FileObj.builder().name(commonPrefix.prefix()).isFolder(true).size("").build());
+    }
+    for (S3Object objectSummary : resp.contents()) {
+      Long size = objectSummary.size();
+      items.add(
+          FileObj.builder()
+              .name(objectSummary.key())
+              .isFolder(false)
+              .size(Util.renderFileSize(size))
+              .build());
+      //      log.info(" - {} (size: {})", objectSummary.key(), Util.renderFileSize(size));
+    }
+    String token = resp.nextContinuationToken();
+    return new LsResponse(items, token);
   }
 }
