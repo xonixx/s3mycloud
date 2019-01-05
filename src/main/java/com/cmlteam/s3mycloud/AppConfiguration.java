@@ -24,42 +24,43 @@ import java.util.concurrent.Executors;
 @EnableScheduling
 @EnableAsync
 public class AppConfiguration implements AsyncConfigurer, SchedulingConfigurer {
-    @Bean
-    public ReloadableResourceBundleMessageSource messageSource() {
-        ReloadableResourceBundleMessageSource messageSource = new ReloadableResourceBundleMessageSource();
-        messageSource.setBasename("classpath:messages");
-        messageSource.setCacheSeconds(3600); //refresh cache once per hour
-        return messageSource;
-    }
+  @Bean
+  public ReloadableResourceBundleMessageSource messageSource() {
+    ReloadableResourceBundleMessageSource messageSource =
+        new ReloadableResourceBundleMessageSource();
+    messageSource.setBasename("classpath:messages");
+    messageSource.setCacheSeconds(3600); // refresh cache once per hour
+    return messageSource;
+  }
 
-    @Bean
-    public JdbcTemplate getJdbcTemplate(DataSource dataSource) {
-        return new JdbcTemplate(dataSource);
-    }
+  @Bean
+  public JdbcTemplate getJdbcTemplate(DataSource dataSource) {
+    return new JdbcTemplate(dataSource);
+  }
 
-    @Override
-    public Executor getAsyncExecutor() {
-        ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
-        executor.setCorePoolSize(3);
-        executor.setMaxPoolSize(20);
-        executor.setQueueCapacity(100);
-        executor.setThreadNamePrefix("AppAsyncExecutor-");
-        executor.initialize();
-        return executor;
-    }
+  @Override
+  public Executor getAsyncExecutor() {
+    ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
+    executor.setCorePoolSize(3);
+    executor.setMaxPoolSize(20);
+    executor.setQueueCapacity(100);
+    executor.setThreadNamePrefix("AppAsyncExecutor-");
+    executor.initialize();
+    return executor;
+  }
 
-    @Override
-    public AsyncUncaughtExceptionHandler getAsyncUncaughtExceptionHandler() {
-        return new SimpleAsyncUncaughtExceptionHandler();
-    }
+  @Override
+  public AsyncUncaughtExceptionHandler getAsyncUncaughtExceptionHandler() {
+    return new SimpleAsyncUncaughtExceptionHandler();
+  }
 
-    @Override
-    public void configureTasks(ScheduledTaskRegistrar taskRegistrar) {
-        taskRegistrar.setScheduler(taskExecutor());
-    }
+  @Override
+  public void configureTasks(ScheduledTaskRegistrar taskRegistrar) {
+    taskRegistrar.setScheduler(taskExecutor());
+  }
 
-    @Bean(destroyMethod="shutdown")
-    public Executor taskExecutor() {
-        return Executors.newScheduledThreadPool(10);
-    }
+  @Bean(destroyMethod = "shutdown")
+  public Executor taskExecutor() {
+    return Executors.newScheduledThreadPool(10);
+  }
 }

@@ -6,14 +6,14 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class SampleService {
-    private final JdbcTemplate jdbcTemplate;
+  private final JdbcTemplate jdbcTemplate;
 
-    @Autowired
-    public SampleService(JdbcTemplate jdbcTemplate) {
-        this.jdbcTemplate = jdbcTemplate;
-    }
+  @Autowired
+  public SampleService(JdbcTemplate jdbcTemplate) {
+    this.jdbcTemplate = jdbcTemplate;
+  }
 
-    public String getDbVersion() {
-        return jdbcTemplate.queryForObject("select version();", String.class);
-    }
+  public String getDbVersion() {
+    return jdbcTemplate.queryForObject("select version();", String.class);
+  }
 }

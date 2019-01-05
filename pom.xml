@@ -86,6 +86,11 @@
 			<artifactId>spring-web-requests-logging</artifactId>
 			<version>v0.9</version>
 		</dependency>
+		<dependency>
+			<groupId>software.amazon.awssdk</groupId>
+			<artifactId>s3</artifactId>
+			<version>2.2.0</version>
+		</dependency>
 	</dependencies>
 
 	<build>
