@@ -17,22 +17,23 @@ class Files extends Component {
   }
 
   load = async () => {
-    const { items, next } = await filesApi.ls(this.state.selectedFolder, null);
-    this.setState({ items, next });
+    const { items: moreItems, next } = await filesApi.ls(
+      this.state.selectedFolder,
+      this.state.next
+    );
+    this.setState({ items: [...this.state.items, ...moreItems], next });
   };
-
-  async loadNext() {}
 
   loadFolder = name => {
     this.setState(
-      { selectedFolder: `${this.state.selectedFolder}${name}`, next: null },
+      { items: [], selectedFolder: `${this.state.selectedFolder}${name}`, next: null },
       this.load
     );
   };
 
   render() {
     return (
-      <div>
+      <div style={{ padding: 10 }}>
         {this.state.items.map(f => (
           <div key={f.name} style={{ border: "dotted 1px #ddd" }}>
             {f.folder ? (
@@ -56,7 +57,7 @@ class Files extends Component {
             href={"#"}
             onClick={e => {
               e.preventDefault();
-              this.loadNext();
+              this.load();
             }}
           >
             more...
