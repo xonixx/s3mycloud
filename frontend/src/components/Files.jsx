@@ -26,7 +26,7 @@ class Files extends Component {
 
   loadFolder = name => {
     this.setState(
-      { items: [], selectedFolder: `${this.state.selectedFolder}${name}`, next: null },
+      { items: [], selectedFolder: `${this.state.selectedFolder}${name}/`, next: null },
       this.load
     );
   };

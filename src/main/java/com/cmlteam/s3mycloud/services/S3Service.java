@@ -182,6 +182,7 @@ public class S3Service {
 
     String prefix = lsRequest.getFolder();
     if (prefix == null) prefix = "";
+    if (!"".equals(prefix) && !prefix.endsWith("/")) prefix += "/";
 
     Integer limit = lsRequest.getLimit();
     if (limit == null || limit == 0) limit = DEFAULT_LIMIT;
@@ -199,13 +200,17 @@ public class S3Service {
 
     for (CommonPrefix commonPrefix : resp.commonPrefixes()) {
       //      log.info(" - {}", commonPrefix.prefix());
-      items.add(FileObj.builder().name(commonPrefix.prefix()).isFolder(true).size("").build());
+      String key = commonPrefix.prefix();
+      String[] parts = key.split("/");
+      items.add(FileObj.builder().name(parts[parts.length - 1]).isFolder(true).size("").build());
     }
     for (S3Object objectSummary : resp.contents()) {
       Long size = objectSummary.size();
+      String key = objectSummary.key();
+      String[] parts = key.split("/");
       items.add(
           FileObj.builder()
-              .name(objectSummary.key())
+              .name(parts[parts.length - 1])
               .isFolder(false)
               .size(Util.renderFileSize(size))
               .build());
