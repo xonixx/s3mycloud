@@ -16,25 +16,33 @@ class Files extends Component {
     await this.load();
   }
 
-  async load() {
+  load = async () => {
     const { items, next } = await filesApi.ls(this.state.selectedFolder, null);
     this.setState({ items, next });
-  }
+  };
 
   async loadNext() {}
 
-  async loadFolder(name) {
-    this.setState({ selectedFolder: `${this.state.selectedFolder}/${name}`, next: null });
-    await this.load();
-  }
+  loadFolder = name => {
+    this.setState(
+      { selectedFolder: `${this.state.selectedFolder}${name}`, next: null },
+      this.load
+    );
+  };
 
   render() {
     return (
       <div>
         {this.state.items.map(f => (
-          <div style={{ border: "dotted 1px #ddd" }}>
+          <div key={f.name} style={{ border: "dotted 1px #ddd" }}>
             {f.folder ? (
-              <a href={""} onClick={() => this.loadFolder(f.name)}>
+              <a
+                href={"#"}
+                onClick={e => {
+                  e.preventDefault();
+                  this.loadFolder(f.name);
+                }}
+              >
                 {f.name}
               </a>
             ) : (
@@ -44,7 +52,13 @@ class Files extends Component {
           </div>
         ))}
         {this.state.next && (
-          <a href={""} onClick={this.loadNext}>
+          <a
+            href={"#"}
+            onClick={e => {
+              e.preventDefault();
+              this.loadNext();
+            }}
+          >
             more...
           </a>
         )}

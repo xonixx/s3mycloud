@@ -4,12 +4,14 @@ import com.cmlteam.s3mycloud.model.LsRequest;
 import com.cmlteam.s3mycloud.model.LsResponse;
 import com.cmlteam.s3mycloud.services.S3Service;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.validation.Valid;
 
 @RestController
+@CrossOrigin(origins = "http://localhost:3000")
 public class FilesController {
   private final S3Service s3Service;
 
