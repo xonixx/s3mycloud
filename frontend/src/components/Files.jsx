@@ -24,16 +24,48 @@ class Files extends Component {
     this.setState({ items: [...this.state.items, ...moreItems], next });
   };
 
-  loadFolder = name => {
-    this.setState(
-      { items: [], selectedFolder: `${this.state.selectedFolder}${name}/`, next: null },
-      this.load
-    );
+  loadFolder = name => this.loadFolderFull(`${this.state.selectedFolder}${name}/`);
+
+  loadFolderFull = fullPath => {
+    this.setState({ items: [], selectedFolder: fullPath, next: null }, this.load);
   };
 
   render() {
+    const selectedFolder = this.state.selectedFolder;
+    let selectedFolderParts = selectedFolder.split("/");
+    selectedFolderParts = selectedFolderParts.slice(0, selectedFolderParts.length - 1);
+    selectedFolderParts = ["", ...selectedFolderParts];
     return (
       <div style={{ padding: 10 }}>
+        {selectedFolder && (
+          <div style={{ marginBottom: 10 }}>
+            {selectedFolderParts.map((part, i) => {
+              let fullPath = selectedFolderParts.slice(1, i + 1).join("/") + "/";
+              if (fullPath === "/") fullPath = "";
+              return (
+                <span key={fullPath}>
+                  {i === selectedFolderParts.length - 1 ? (
+                    part
+                  ) : (
+                    <span>
+                      <a
+                        href={""}
+                        title={fullPath}
+                        onClick={e => {
+                          e.preventDefault();
+                          this.loadFolderFull(fullPath);
+                        }}
+                      >
+                        {part || "home"}
+                      </a>
+                      {" / "}
+                    </span>
+                  )}
+                </span>
+              );
+            })}
+          </div>
+        )}
         {this.state.items.map(f => (
           <div key={f.name} style={{ border: "dotted 1px #ddd" }}>
             {f.folder ? (
@@ -49,7 +81,7 @@ class Files extends Component {
             ) : (
               f.name
             )}
-            {f.size ? `(${f.size})` : ""}
+            {f.size ? ` (${f.size})` : ""}
           </div>
         ))}
         {this.state.next && (
