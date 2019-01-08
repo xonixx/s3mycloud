@@ -208,12 +208,10 @@ public class S3Service {
       Long size = objectSummary.size();
       String key = objectSummary.key();
       String[] parts = key.split("/");
+      String name = parts[parts.length - 1];
+      if (("/" + prefix).endsWith("/" + name + "/") && size == 0L) continue; // same folder that we list
       items.add(
-          FileObj.builder()
-              .name(parts[parts.length - 1])
-              .isFolder(false)
-              .size(Util.renderFileSize(size))
-              .build());
+          FileObj.builder().name(name).isFolder(false).size(Util.renderFileSize(size)).build());
       //      log.info(" - {} (size: {})", objectSummary.key(), Util.renderFileSize(size));
     }
     String token = resp.nextContinuationToken();

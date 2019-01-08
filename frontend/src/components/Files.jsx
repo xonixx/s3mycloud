@@ -58,7 +58,7 @@ class Files extends Component {
                       >
                         {part || "home"}
                       </a>
-                      {" / "}
+                      {" > "}
                     </span>
                   )}
                 </span>
