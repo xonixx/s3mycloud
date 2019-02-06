@@ -1,4 +1,4 @@
-application-external.yml
+/application-external.yml
 
 target/
 !.mvn/wrapper/maven-wrapper.jar
