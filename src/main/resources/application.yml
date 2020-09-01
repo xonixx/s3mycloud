@@ -23,9 +23,9 @@ logRestRequestWebInterceptor:
   enabled: true
 
 s3:
-  bucket: s3mycloud-1
-  accessKey: EXTERNAL
-  secretKey: EXTERNAL
+  bucket: # EXTERNAL
+  accessKey: # EXTERNAL
+  secretKey: # EXTERNAL
   region: us-west-1
   endpoint: https://s3.us-west-1.wasabisys.com
 

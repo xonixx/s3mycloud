@@ -5,16 +5,20 @@ import lombok.Setter;
 import lombok.ToString;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
+import org.springframework.validation.annotation.Validated;
+
+import javax.validation.constraints.NotBlank;
 
 @Component
 @ConfigurationProperties(prefix = "s3")
+@Validated
 @Getter
 @Setter
 @ToString(exclude = {"accessKey", "secretKey"})
 public class S3Props {
-  private String bucket;
-  private String accessKey;
-  private String secretKey;
-  private String region;
-  private String endpoint;
+  @NotBlank private String bucket;
+  @NotBlank private String accessKey;
+  @NotBlank private String secretKey;
+  @NotBlank private String region;
+  @NotBlank private String endpoint;
 }
