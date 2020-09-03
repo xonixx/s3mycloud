@@ -7,7 +7,6 @@ import org.springframework.boot.autoconfigure.jackson.JacksonAutoConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.support.ReloadableResourceBundleMessageSource;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.scheduling.annotation.AsyncConfigurer;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.annotation.EnableScheduling;
@@ -15,7 +14,6 @@ import org.springframework.scheduling.annotation.SchedulingConfigurer;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.scheduling.config.ScheduledTaskRegistrar;
 
-import javax.sql.DataSource;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
@@ -23,7 +21,7 @@ import java.util.concurrent.Executors;
 @EnableAutoConfiguration(exclude = {JacksonAutoConfiguration.class})
 @EnableScheduling
 @EnableAsync
-public class AppConfiguration implements AsyncConfigurer, SchedulingConfigurer {
+public class AppConfig implements AsyncConfigurer, SchedulingConfigurer {
   @Bean
   public ReloadableResourceBundleMessageSource messageSource() {
     ReloadableResourceBundleMessageSource messageSource =
@@ -31,11 +29,6 @@ public class AppConfiguration implements AsyncConfigurer, SchedulingConfigurer {
     messageSource.setBasename("classpath:messages");
     messageSource.setCacheSeconds(3600); // refresh cache once per hour
     return messageSource;
-  }
-
-  @Bean
-  public JdbcTemplate getJdbcTemplate(DataSource dataSource) {
-    return new JdbcTemplate(dataSource);
   }
 
   @Override
