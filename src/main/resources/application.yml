@@ -2,23 +2,6 @@ server:
   address: 127.0.0.1
   port: 8080
 
-spring:
-  datasource:
-    url: jdbc:mysql://localhost/s3mycloud?useUnicode=true&rewriteBatchedStatements=true&useSSL=false
-    username: s3mycloud
-    password: s3mycloud
-    driverClassName: com.mysql.jdbc.Driver
-    maxActive: 15
-    maxIdle: 5
-    minIdle: 2
-    initialSize: 5
-    removeAbandoned: true
-
-  liquibase:
-    # TODO remove line below to enable liquibase
-    enabled: false
-    change-log: classpath:changelog.xml
-
 logRestRequestWebInterceptor:
   enabled: true
 
