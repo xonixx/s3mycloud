@@ -4,7 +4,7 @@
    
 ### I. Upload metadata
 ```
-POST /api/upload
+POST /api/file/upload
 
 {
     "name": "file_name.ext",           # required
@@ -77,5 +77,37 @@ response (error):
 ```
 {
     "error": "file not found"
+}
+```
+
+## 4. Assign tags
+```
+POST /api/file/{ID}/tags
+
+["tag1", "tag2", "tag3"]
+```
+returns status 200 and body
+```
+{"success": true}
+```
+
+## 5. Remove tags
+
+```
+DELETE /api/file/{ID}/tags
+
+["tag1", "tag3"]
+```
+
+returns status 200 if all OK and body
+```
+{"success": true}
+```
+
+returns status 400 if one of the tags is not present on the file and body
+```
+{
+    "success": false,
+    "error": "tag not found on file"
 }
 ```
