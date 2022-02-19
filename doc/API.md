@@ -65,7 +65,7 @@ response (success):
 
 ## 3. Delete file
 ```
-DELETE /api/file/ID
+DELETE /api/file/{ID}
 ```
 response (success):
 ```
