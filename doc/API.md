@@ -16,7 +16,7 @@ response (success):
 ```
 {
     "id": "ID"                         # unique ID as assigned by storage engine
-    "upload_url"                       # S3 URL for PUT
+    "uploadUrl"                        # S3 URL for PUT
 }
 ```
 response (error):

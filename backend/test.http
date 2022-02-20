@@ -1,0 +1,23 @@
+GET localhost:8080/api/file
+
+###
+
+POST localhost:8080/api/file/upload
+Content-Type: application/json
+
+{
+  "name": "file.txt",
+  "size": 100,
+  "tags": ["text", "document"]
+}
+
+###
+
+POST localhost:8080/api/file/upload
+Content-Type: application/json
+
+{
+  "name": "cat.jpg",
+  "size": 500000,
+  "tags": ["image"]
+}
