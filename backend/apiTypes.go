@@ -30,6 +30,7 @@ func listFileRecordOf(f file) listFileRecord {
 	return listFileRecord{
 		Id:       f.Id,
 		Name:     f.Name,
+		Size:     f.Size,
 		Url:      f.Url,
 		Tags:     f.Tags,
 		Uploaded: f.Created,
