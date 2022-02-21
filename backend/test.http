@@ -23,3 +23,7 @@ Content-Type: application/json
   "size": 500000,
   "tags": ["image"]
 }
+
+###
+
+DELETE localhost:8080/api/file/1

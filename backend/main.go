@@ -33,10 +33,20 @@ func listFiles(c *gin.Context) {
 	})
 }
 
+func deleteFile(c *gin.Context) {
+	id := c.Param("id")
+	if e := removeFile(id); e != nil {
+		c.IndentedJSON(http.StatusNotFound, errorResponseOf(e))
+		return
+	}
+	c.IndentedJSON(http.StatusOK, success)
+}
+
 func main() {
 	router := gin.Default()
 	router.POST("/api/file/upload", uploadMetadata)
 	router.GET("/api/file", listFiles)
+	router.DELETE("/api/file/:id", deleteFile)
 
 	router.Run("localhost:8080")
 }

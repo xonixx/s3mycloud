@@ -12,6 +12,14 @@ type uploadMetadataResponse struct {
 	Error     string `json:"error,omitempty"`
 }
 
+type errorResponse struct {
+	Error string `json:"error,omitempty"`
+}
+
+type successResponse struct {
+	Success bool `json:"success"`
+}
+
 type listFileRecord struct {
 	Id       string   `json:"id"`
 	Name     string   `json:"name"`
@@ -36,3 +44,9 @@ func listFileRecordOf(f file) listFileRecord {
 		Uploaded: f.Created,
 	}
 }
+
+func errorResponseOf(e error) errorResponse {
+	return errorResponse{e.Error()}
+}
+
+var success = successResponse{true}

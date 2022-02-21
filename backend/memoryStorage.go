@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"strconv"
 	"time"
 )
@@ -32,4 +33,14 @@ func addFile(request uploadMetadataRequest) file {
 	filesMemStorage = append(filesMemStorage, f)
 
 	return f
+}
+
+func removeFile(id string) error {
+	for i, f := range filesMemStorage {
+		if id == f.Id {
+			filesMemStorage = append(filesMemStorage[:i], filesMemStorage[i+1:]...)
+			return nil
+		}
+	}
+	return errors.New("file not found")
 }
