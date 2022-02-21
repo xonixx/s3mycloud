@@ -1,0 +1,38 @@
+GET http://localhost:8080/api/file
+
+<> 2022-02-21T182508.200.json
+
+###
+
+POST http://localhost:8080/api/file/upload
+Content-Type: application/json
+
+{
+  "name": "cat.jpg",
+  "size": 500000,
+  "tags": ["image"]
+}
+
+<> 2022-02-21T182505.201.json
+
+###
+
+POST http://localhost:8080/api/file/upload
+Content-Type: application/json
+
+{
+  "name": "file.txt",
+  "size": 100,
+  "tags": ["text", "document"]
+}
+
+<> 2022-02-21T182503.201.json
+
+###
+
+GET http://localhost:8080/api/file
+
+<> 2022-02-21T182500.200.json
+
+###
+
