@@ -34,13 +34,19 @@ type listFilesResponse struct {
 	Total uint             `json:"total"`
 }
 
+type listOfTags []string
+
 func listFileRecordOf(f file) listFileRecord {
+	var tags []string
+	for t := range f.Tags {
+		tags = append(tags, t)
+	}
 	return listFileRecord{
 		Id:       f.Id,
 		Name:     f.Name,
 		Size:     f.Size,
 		Url:      f.Url,
-		Tags:     f.Tags,
+		Tags:     tags,
 		Uploaded: f.Created,
 	}
 }

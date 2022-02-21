@@ -10,7 +10,7 @@ func uploadMetadata(c *gin.Context) {
 	var newFileRequest uploadMetadataRequest
 
 	if err := c.BindJSON(&newFileRequest); err != nil {
-		return
+		return // TODO 400
 	}
 
 	f := addFile(newFileRequest)
@@ -42,11 +42,25 @@ func deleteFile(c *gin.Context) {
 	c.IndentedJSON(http.StatusOK, success)
 }
 
+func apiAssignTags(c *gin.Context) {
+	var tags listOfTags
+	if err := c.BindJSON(&tags); err != nil {
+		return // TODO 400
+	}
+	id := c.Param("id")
+	if err := assignTags(id, tags); err != nil {
+		c.IndentedJSON(http.StatusNotFound, errorResponseOf(err))
+		return
+	}
+	c.IndentedJSON(http.StatusOK, success)
+}
+
 func main() {
 	router := gin.Default()
 	router.POST("/api/file/upload", uploadMetadata)
 	router.GET("/api/file", listFiles)
 	router.DELETE("/api/file/:id", deleteFile)
+	router.POST("/api/file/:id/tags", apiAssignTags)
 
 	router.Run("localhost:8080")
 }

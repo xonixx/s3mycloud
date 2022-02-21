@@ -27,3 +27,10 @@ Content-Type: application/json
 ###
 
 DELETE localhost:8080/api/file/1
+
+###
+
+POST localhost:8080/api/file/1/tags
+Content-Type: application/json
+
+["tag1", "tag2"]
