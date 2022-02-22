@@ -10,7 +10,7 @@ func uploadMetadataHandler(c *gin.Context) {
 	var newFileRequest uploadMetadataRequest
 
 	if err := c.BindJSON(&newFileRequest); err != nil {
-		return // TODO 400
+		return
 	}
 
 	f := addFile(newFileRequest)
@@ -45,7 +45,7 @@ func deleteFileHandler(c *gin.Context) {
 func assignTagsHandler(c *gin.Context) {
 	var tags listOfTags
 	if err := c.BindJSON(&tags); err != nil {
-		return // TODO 400
+		return
 	}
 	id := c.Param("id")
 	if err := assignTags(id, tags); err != nil {
@@ -58,7 +58,7 @@ func assignTagsHandler(c *gin.Context) {
 func removeTagsHandler(c *gin.Context) {
 	var tags listOfTags
 	if err := c.BindJSON(&tags); err != nil {
-		return // TODO 400
+		return
 	}
 	id := c.Param("id")
 	if err := removeTags(id, tags); err != nil {
