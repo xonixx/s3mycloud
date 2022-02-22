@@ -51,6 +51,21 @@ func readJsonAsMap(t *testing.T, resp *http.Response) gin.H {
 	return body
 }
 
+func checkAndReadRespJson(t *testing.T, resp *http.Response, err error, expectedStatus int) gin.H {
+	checkResponse(t, resp, err, expectedStatus)
+	return readJsonAsMap(t, resp)
+}
+
+func getJsonField(t *testing.T, m gin.H, field string) interface{} {
+	val, ok := m[field]
+	if !ok {
+		t.Fatalf("should contain %s", field)
+		return nil
+	} else {
+		return val
+	}
+}
+
 func TestAddFileTxt(t *testing.T) {
 	ts := httptest.NewServer(setupServer())
 	defer ts.Close()
@@ -61,7 +76,10 @@ func TestAddFileTxt(t *testing.T) {
 		"tags": []string{"text", "document"},
 	}))
 
-	fmt.Println("resp JSON:", readJsonAsMap(t, resp))
+	//fmt.Println("resp JSON:", readJsonAsMap(t, resp))
 
-	checkResponse(t, resp, err, http.StatusCreated)
+	respJson := checkAndReadRespJson(t, resp, err, http.StatusCreated)
+
+	getJsonField(t, respJson, "id")
+	getJsonField(t, respJson, "uploadUrl")
 }
