@@ -79,6 +79,10 @@ func removeTagsHandler(c *gin.Context) {
 }
 
 func main() {
+	setupServer().Run("localhost:8080")
+}
+
+func setupServer() *gin.Engine {
 	router := gin.Default()
 
 	// TODO use https://github.com/gin-gonic/gin#grouping-routes
@@ -87,6 +91,5 @@ func main() {
 	router.DELETE("/api/file/:id", deleteFileHandler)
 	router.POST("/api/file/:id/tags", assignTagsHandler)
 	router.DELETE("/api/file/:id/tags", removeTagsHandler)
-
-	router.Run("localhost:8080")
+	return router
 }
