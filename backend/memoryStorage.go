@@ -20,6 +20,10 @@ type file struct {
 var filesMemStorage []file
 var globalId uint64
 
+func cleanupMemStorage() {
+	filesMemStorage = nil
+}
+
 // @returns storage-level file object
 func addFile(request uploadMetadataRequest) file {
 	var f file
