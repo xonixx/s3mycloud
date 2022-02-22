@@ -172,7 +172,7 @@ func TestAddSingleFile(t *testing.T) {
 	}
 }
 
-func TestList(t *testing.T) {
+func TestListDefaultSorting(t *testing.T) {
 	ts := httptest.NewServer(setupServer())
 	defer ts.Close()
 	th := testHelper{t, ts}
@@ -189,4 +189,23 @@ func TestList(t *testing.T) {
 	th.assertEqualsJsonPath(respJson, "ccc", "page", "2", "name")
 	th.assertEqualsJsonPath(respJson, "bbb.txt", "page", "3", "name")
 	th.assertEqualsJsonPath(respJson, "aaa.mp3", "page", "4", "name")
+}
+
+func TestListOlderFirst(t *testing.T) {
+	ts := httptest.NewServer(setupServer())
+	defer ts.Close()
+	th := testHelper{t, ts}
+	th.setupFiles()
+
+	respJson := th.get("api/file?sort=uploaded,asc")
+
+	if total := int(getJsonField(t, respJson, "total").(float64)); total != 5 {
+		t.Fatalf("wrong total: %d", total)
+	}
+
+	th.assertEqualsJsonPath(respJson, "aaa.mp3", "page", "0", "name")
+	th.assertEqualsJsonPath(respJson, "bbb.txt", "page", "1", "name")
+	th.assertEqualsJsonPath(respJson, "ccc", "page", "2", "name")
+	th.assertEqualsJsonPath(respJson, "ddd", "page", "3", "name")
+	th.assertEqualsJsonPath(respJson, "eee", "page", "4", "name")
 }
