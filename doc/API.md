@@ -35,15 +35,21 @@ file bytes...
 
 ## 2. List files
 ```
-GET /api/file?name=partOfName&tags=tag1,tag2,tag3&page=2&pageSize=10
+GET /api/file?name=partOfName&tags=tag1,tag2,tag3&page=2&pageSize=10&sort=name,desc
 ```
                                            
-| param    | optional | default | description                           |
-|----------|----------|---------|---------------------------------------|
-| name     | yes      |         | part of name to filter by             |
-| tags     | yes      |         | list of tags to filter by (AND-logic) |
-| page     | yes      | 0       | 0-based                               |
-| pageSize | yes      | 10      |                                       |
+| param    | optional | default       | description                           |
+|----------|----------|---------------|---------------------------------------|
+| name     | yes      |               | part of name to filter by             |
+| tags     | yes      |               | list of tags to filter by (AND-logic) |
+| page     | yes      | 0             | 0-based                               |
+| pageSize | yes      | 10            |                                       |
+| sort     | yes      | uploaded,desc |                                       |
+
+Sort fields:
+- name
+- size
+- uploaded
 
 response (success):
 ```

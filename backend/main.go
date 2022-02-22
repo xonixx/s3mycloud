@@ -23,6 +23,10 @@ func uploadMetadataHandler(c *gin.Context) {
 }
 
 func listFilesHandler(c *gin.Context) {
+	var listQuery listFilesQueryRequest
+	if err := c.BindQuery(&listQuery); err != nil {
+		return
+	}
 	var page []listFileRecord
 	for _, f := range filesMemStorage {
 		page = append(page, listFileRecordOf(f))
@@ -70,6 +74,8 @@ func removeTagsHandler(c *gin.Context) {
 
 func main() {
 	router := gin.Default()
+
+	// TODO use https://github.com/gin-gonic/gin#grouping-routes
 	router.POST("/api/file/upload", uploadMetadataHandler)
 	router.GET("/api/file", listFilesHandler)
 	router.DELETE("/api/file/:id", deleteFileHandler)

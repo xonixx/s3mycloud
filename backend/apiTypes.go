@@ -20,6 +20,14 @@ type successResponse struct {
 	Success bool `json:"success"`
 }
 
+type listFilesQueryRequest struct {
+	Name     string   `form:"name"`
+	Page     uint     `form:"page"`
+	PageSize uint     `form:"pageSize"`
+	Tags     []string `form:"tags"`
+	Sort     []string `form:"sort"`
+}
+
 type listFileRecord struct {
 	Id       string   `json:"id"`
 	Name     string   `json:"name"`
