@@ -1,8 +1,8 @@
-###
+### list files
 
 GET localhost:8080/api/file
 
-###
+### upload file.txt
 
 POST localhost:8080/api/file/upload
 Content-Type: application/json
@@ -13,7 +13,7 @@ Content-Type: application/json
   "tags": ["text", "document"]
 }
 
-###
+### upload cat.jpg
 
 POST localhost:8080/api/file/upload
 Content-Type: application/json
@@ -24,25 +24,25 @@ Content-Type: application/json
   "tags": ["image"]
 }
 
-###
+### delete file 1
 
 DELETE localhost:8080/api/file/1
 
-###
+### add tags to file 1
 
 POST localhost:8080/api/file/1/tags
 Content-Type: application/json
 
 ["tag1", "tag2"]
 
-###
+### remove tags from file 1
 
 DELETE localhost:8080/api/file/1/tags
 Content-Type: application/json
 
 ["tag1"]
 
-###
+### remove non-existing tag from file 1
 
 DELETE localhost:8080/api/file/1/tags
 Content-Type: application/json
