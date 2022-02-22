@@ -2,6 +2,7 @@ package main
 
 import (
 	"errors"
+	"sort"
 	"strconv"
 	"strings"
 	"time"
@@ -76,6 +77,26 @@ func listFiles(listQuery listFilesQueryRequest) listFilesResponse {
 	to = from + int(listQuery.PageSize)
 	if to > total {
 		to = total
+	}
+	if len(listQuery.Sort) > 0 {
+		by := listQuery.Sort[0]
+		desc := len(listQuery.Sort) > 1 && listQuery.Sort[1] == "desc"
+		sort.SliceStable(matched, func(i, j int) bool {
+			if desc {
+				i, j = j, i
+			}
+			f1 := matched[i]
+			f2 := matched[j]
+			if by == "name" {
+				return f1.Name < f2.Name
+			} else if by == "size" {
+				return f1.Size < f2.Size
+			} else if by == "uploaded" {
+				return f1.Created < f2.Created
+			} else {
+				panic("Wrong sort by: " + by)
+			}
+		})
 	}
 	for _, f := range matched[from:to] {
 		page = append(page, listFileRecordOf(f))

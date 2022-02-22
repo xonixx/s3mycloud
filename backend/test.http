@@ -2,6 +2,14 @@
 
 GET localhost:8080/api/file
 
+### list files sorted size
+
+GET localhost:8080/api/file?sort=size
+
+### list files sorted size,desc
+
+GET localhost:8080/api/file?sort=size,desc
+
 ### list files (pageSize=1)
 
 GET localhost:8080/api/file?pageSize=1
