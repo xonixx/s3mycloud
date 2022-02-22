@@ -27,14 +27,14 @@ func listFilesHandler(c *gin.Context) {
 	if err := c.BindQuery(&listQuery); err != nil {
 		return
 	}
-	var page []listFileRecord
-	for _, f := range filesMemStorage {
-		page = append(page, listFileRecordOf(f))
+	if listQuery.PageSize == 0 {
+		listQuery.PageSize = 10
 	}
-	c.IndentedJSON(http.StatusOK, listFilesResponse{
-		Page:  page,
-		Total: uint(len(filesMemStorage)),
-	})
+	if len(listQuery.Sort) == 0 {
+		listQuery.Sort = []string{"uploaded", "desc"}
+	}
+
+	c.IndentedJSON(http.StatusOK, listFiles(listQuery))
 }
 
 func deleteFileHandler(c *gin.Context) {

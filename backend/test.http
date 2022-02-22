@@ -2,6 +2,14 @@
 
 GET localhost:8080/api/file
 
+### list files (pageSize=1)
+
+GET localhost:8080/api/file?pageSize=1
+
+### list files (pageSize=1&page=1)
+
+GET localhost:8080/api/file?pageSize=1&page=1
+
 ### upload file.txt
 
 POST localhost:8080/api/file/upload

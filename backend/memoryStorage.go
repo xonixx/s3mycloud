@@ -3,6 +3,7 @@ package main
 import (
 	"errors"
 	"strconv"
+	"strings"
 	"time"
 )
 
@@ -45,6 +46,44 @@ func findFile(id string) (int, file) {
 		}
 	}
 	return -1, file{}
+}
+
+func listFiles(listQuery listFilesQueryRequest) listFilesResponse {
+	var matched []file
+	for _, f := range filesMemStorage {
+		var matchedName, matchedTags bool
+		matchedName = true
+		matchedTags = true
+		if listQuery.Name != "" {
+			matchedName = strings.Contains(f.Name, listQuery.Name)
+		}
+		if len(listQuery.Tags) > 0 {
+			for _, tag := range listQuery.Tags {
+				if !f.Tags[tag] {
+					matchedTags = false
+					break
+				}
+			}
+		}
+		if matchedName && matchedTags {
+			matched = append(matched, f)
+		}
+	}
+	total := len(matched)
+	var page []listFileRecord
+	var from, to int
+	from = int(listQuery.Page * listQuery.PageSize)
+	to = from + int(listQuery.PageSize)
+	if to > total {
+		to = total
+	}
+	for _, f := range matched[from:to] {
+		page = append(page, listFileRecordOf(f))
+	}
+	return listFilesResponse{
+		Page:  page,
+		Total: uint(total),
+	}
 }
 
 func removeFile(id string) error {
