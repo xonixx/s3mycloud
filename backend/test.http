@@ -34,3 +34,17 @@ POST localhost:8080/api/file/1/tags
 Content-Type: application/json
 
 ["tag1", "tag2"]
+
+###
+
+DELETE localhost:8080/api/file/1/tags
+Content-Type: application/json
+
+["tag1"]
+
+###
+
+DELETE localhost:8080/api/file/1/tags
+Content-Type: application/json
+
+["tag2", "tag3"]

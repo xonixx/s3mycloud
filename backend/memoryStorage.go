@@ -67,6 +67,18 @@ func assignTags(id string, tags []string) error {
 	}
 }
 
-//func removeTags(id string, tags []string) error {
-//
-//}
+func removeTags(id string, tags []string) error {
+	if i, f := findFile(id); i >= 0 {
+		for _, t := range tags {
+			if !f.Tags[t] {
+				return errors.New("tag not found")
+			}
+		}
+		for _, t := range tags {
+			delete(f.Tags, t)
+		}
+		return nil
+	} else {
+		return errors.New("file not found")
+	}
+}

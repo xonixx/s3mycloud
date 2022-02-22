@@ -6,7 +6,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func uploadMetadata(c *gin.Context) {
+func uploadMetadataHandler(c *gin.Context) {
 	var newFileRequest uploadMetadataRequest
 
 	if err := c.BindJSON(&newFileRequest); err != nil {
@@ -22,7 +22,7 @@ func uploadMetadata(c *gin.Context) {
 	c.IndentedJSON(http.StatusCreated, response)
 }
 
-func listFiles(c *gin.Context) {
+func listFilesHandler(c *gin.Context) {
 	var page []listFileRecord
 	for _, f := range filesMemStorage {
 		page = append(page, listFileRecordOf(f))
@@ -33,7 +33,7 @@ func listFiles(c *gin.Context) {
 	})
 }
 
-func deleteFile(c *gin.Context) {
+func deleteFileHandler(c *gin.Context) {
 	id := c.Param("id")
 	if e := removeFile(id); e != nil {
 		c.IndentedJSON(http.StatusNotFound, errorResponseOf(e))
@@ -42,7 +42,7 @@ func deleteFile(c *gin.Context) {
 	c.IndentedJSON(http.StatusOK, success)
 }
 
-func apiAssignTags(c *gin.Context) {
+func assignTagsHandler(c *gin.Context) {
 	var tags listOfTags
 	if err := c.BindJSON(&tags); err != nil {
 		return // TODO 400
@@ -55,12 +55,26 @@ func apiAssignTags(c *gin.Context) {
 	c.IndentedJSON(http.StatusOK, success)
 }
 
+func removeTagsHandler(c *gin.Context) {
+	var tags listOfTags
+	if err := c.BindJSON(&tags); err != nil {
+		return // TODO 400
+	}
+	id := c.Param("id")
+	if err := removeTags(id, tags); err != nil {
+		c.IndentedJSON(http.StatusNotFound, errorResponseOf(err))
+		return
+	}
+	c.IndentedJSON(http.StatusOK, success)
+}
+
 func main() {
 	router := gin.Default()
-	router.POST("/api/file/upload", uploadMetadata)
-	router.GET("/api/file", listFiles)
-	router.DELETE("/api/file/:id", deleteFile)
-	router.POST("/api/file/:id/tags", apiAssignTags)
+	router.POST("/api/file/upload", uploadMetadataHandler)
+	router.GET("/api/file", listFilesHandler)
+	router.DELETE("/api/file/:id", deleteFileHandler)
+	router.POST("/api/file/:id/tags", assignTagsHandler)
+	router.DELETE("/api/file/:id/tags", removeTagsHandler)
 
 	router.Run("localhost:8080")
 }
