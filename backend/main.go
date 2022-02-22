@@ -2,6 +2,7 @@ package main
 
 import (
 	"net/http"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 )
@@ -32,8 +33,13 @@ func listFilesHandler(c *gin.Context) {
 	}
 	if len(listQuery.Sort) == 0 {
 		listQuery.Sort = []string{"uploaded", "desc"}
+	} else {
+		listQuery.Sort = strings.Split(listQuery.Sort[0], ",")
 	}
-
+	if len(listQuery.Tags) > 0 {
+		listQuery.Tags = strings.Split(listQuery.Tags[0], ",")
+	}
+	//fmt.Println("listQuery:", listQuery)
 	c.IndentedJSON(http.StatusOK, listFiles(listQuery))
 }
 
