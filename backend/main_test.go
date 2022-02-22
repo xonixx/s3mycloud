@@ -210,6 +210,8 @@ func TestListOlderFirst(t *testing.T) {
 	th.assertEqualsJsonPath(respJson, "eee", "page", "4", "name")
 }
 
+func TestListDefaultPageSize(t *testing.T) { // mock default pageSize
+}
 func TestListPaging(t *testing.T) {
 }
 func TestListPagingSorting(t *testing.T) {
