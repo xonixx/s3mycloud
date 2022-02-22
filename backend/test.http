@@ -57,6 +57,16 @@ Content-Type: application/json
   "size": 0
 }
 
+### upload file.txt (size negative)
+
+POST localhost:8080/api/file/upload
+Content-Type: application/json
+
+{
+  "name": "file.txt",
+  "size": -123
+}
+
 
 ### upload cat.jpg
 
