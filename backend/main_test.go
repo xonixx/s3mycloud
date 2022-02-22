@@ -146,7 +146,7 @@ func (th testHelper) setupFiles() {
 	}
 }
 
-func TestAddSingleFile(t *testing.T) {
+func TestUploadFileSuccess(t *testing.T) {
 	cleanupMemStorage()
 	ts := httptest.NewServer(setupServer())
 	defer ts.Close()
@@ -176,7 +176,7 @@ func TestAddSingleFile(t *testing.T) {
 
 }
 
-func TestListDefaultSorting(t *testing.T) {
+func TestListAllDefaults(t *testing.T) {
 	ts := httptest.NewServer(setupServer())
 	defer ts.Close()
 	th := testHelper{t, ts}
@@ -208,4 +208,49 @@ func TestListOlderFirst(t *testing.T) {
 	th.assertEqualsJsonPath(respJson, "ccc", "page", "2", "name")
 	th.assertEqualsJsonPath(respJson, "ddd", "page", "3", "name")
 	th.assertEqualsJsonPath(respJson, "eee", "page", "4", "name")
+}
+
+func TestListPaging(t *testing.T) {
+}
+func TestListPagingSorting(t *testing.T) {
+}
+func TestListFilterSingleTag(t *testing.T) {
+}
+func TestListFilterMultipleTagsWithAndLogic(t *testing.T) {
+}
+func TestListFilterName(t *testing.T) {
+}
+func TestListComplex(t *testing.T) {
+}
+func TestListPageNegativeProduces400(t *testing.T) {
+}
+func TestListPageNotANumberProduces400(t *testing.T) {
+}
+func TestListPageVeryLargeProducesEmptyPage(t *testing.T) {
+}
+func TestListPageSizeNegativeProduces400(t *testing.T) {
+}
+func TestUploadEmptyNameProduces400(t *testing.T) {
+}
+func TestUploadOmittedNameProduces400(t *testing.T) {
+}
+func TestUploadOmittedSizeProduces400(t *testing.T) {
+}
+func TestUploadZeroSizeIsOk(t *testing.T) {
+}
+func TestUploadNegativeSizeProduces400(t *testing.T) {
+}
+func TestDeleteExistingOk(t *testing.T) {
+}
+func TestDeleteWrongIdProduces404(t *testing.T) {
+}
+func TestAssignTagOk(t *testing.T) {
+}
+func TestAssignTagWrongFileProduces404(t *testing.T) {
+}
+func TestRemoveTagOk(t *testing.T) {
+}
+func TestRemoveTagWrongFileProduces404(t *testing.T) {
+}
+func TestRemoveWrongTagProduces404(t *testing.T) {
 }
