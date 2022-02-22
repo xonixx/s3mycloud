@@ -1,8 +1,8 @@
 package main
 
 type uploadMetadataRequest struct {
-	Name string   `json:"name"`
-	Size uint     `json:"size"`
+	Name string   `json:"name" binding:"required"`
+	Size uint     `json:"size" binding:"required"`
 	Tags []string `json:"tags"`
 }
 

@@ -29,6 +29,35 @@ Content-Type: application/json
   "tags": ["text", "document"]
 }
 
+### upload file.txt (no name)
+
+POST localhost:8080/api/file/upload
+Content-Type: application/json
+
+{
+  "size": 100
+}
+
+### upload file.txt (no size)
+
+POST localhost:8080/api/file/upload
+Content-Type: application/json
+
+{
+  "name": "file.txt"
+}
+
+### upload file.txt (size=0)
+
+POST localhost:8080/api/file/upload
+Content-Type: application/json
+
+{
+  "name": "file.txt",
+  "size": 0
+}
+
+
 ### upload cat.jpg
 
 POST localhost:8080/api/file/upload
