@@ -80,6 +80,18 @@ func TestAddFileTxt(t *testing.T) {
 
 	respJson := checkAndReadRespJson(t, resp, err, http.StatusCreated)
 
-	getJsonField(t, respJson, "id")
+	id := getJsonField(t, respJson, "id").(string)
+	//fmt.Println(id)
 	getJsonField(t, respJson, "uploadUrl")
+
+	resp, err = http.Get(fmt.Sprintf("%s/api/file", ts.URL))
+	respJson = checkAndReadRespJson(t, resp, err, http.StatusOK)
+
+	if total := int(getJsonField(t, respJson, "total").(float64)); total != 1 {
+		t.Fatalf("wrong total: %d", total)
+	}
+	resultId := getJsonField(t, respJson, "page").([]interface{})[0].(map[string]interface{})["id"].(string)
+	if id != resultId {
+		t.Fatalf(" resultId %s != id %s", resultId, id)
+	}
 }
