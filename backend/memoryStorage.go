@@ -24,7 +24,7 @@ var globalId uint64
 func addFile(request uploadMetadataRequest) file {
 	var f file
 	f.Name = request.Name
-	f.Size = request.Size
+	f.Size = *request.Size
 	f.Tags = map[string]bool{}
 	for _, tag := range request.Tags {
 		f.Tags[tag] = true

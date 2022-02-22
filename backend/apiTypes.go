@@ -2,7 +2,7 @@ package main
 
 type uploadMetadataRequest struct {
 	Name string   `json:"name" binding:"required"`
-	Size uint     `json:"size" binding:"required"`
+	Size *uint    `json:"size" binding:"required"` // using pointer to distinguish size=0 from omitted
 	Tags []string `json:"tags"`
 }
 

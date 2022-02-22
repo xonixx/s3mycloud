@@ -14,7 +14,6 @@ func uploadMetadataHandler(c *gin.Context) {
 		return
 	}
 
-	// TODO allow explicit size=0 case
 	f := addFile(newFileRequest)
 
 	var response uploadMetadataResponse
