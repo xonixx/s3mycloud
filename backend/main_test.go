@@ -99,6 +99,11 @@ func (th testHelper) get(path string) M {
 
 func (th testHelper) assertEqualsJsonPath(json M, expectedVal interface{}, path ...string) {
 	val := query(json, path...)
+	if _, ok := expectedVal.(int); ok {
+		if floatVal, ok1 := val.(float64); ok1 {
+			val = int(floatVal)
+		}
+	}
 	if val != expectedVal {
 		th.t.Fatalf("expected %v != actual %v", expectedVal, val)
 	}
@@ -145,6 +150,7 @@ func TestAddSingleFile(t *testing.T) {
 	cleanupMemStorage()
 	ts := httptest.NewServer(setupServer())
 	defer ts.Close()
+	th := testHelper{t, ts}
 
 	resp, err := http.Post(fmt.Sprintf("%s/api/file/upload", ts.URL), "application/json", toJson(M{
 		"name": "file.txt",
@@ -163,13 +169,11 @@ func TestAddSingleFile(t *testing.T) {
 	resp, err = http.Get(fmt.Sprintf("%s/api/file", ts.URL))
 	respJson = checkAndReadRespJson(t, resp, err, http.StatusOK)
 
-	if total := int(getJsonField(t, respJson, "total").(float64)); total != 1 {
-		t.Fatalf("wrong total: %d", total)
-	}
-	resultId := query(respJson, "page", "0", "id").(string)
-	if id != resultId {
-		t.Fatalf("resultId %s != id %s", resultId, id)
-	}
+	th.assertEqualsJsonPath(respJson, 1, "total")
+
+	th.assertEqualsJsonPath(respJson, "file.txt", "page", "0", "name")
+	th.assertEqualsJsonPath(respJson, id, "page", "0", "id")
+
 }
 
 func TestListDefaultSorting(t *testing.T) {
@@ -180,9 +184,7 @@ func TestListDefaultSorting(t *testing.T) {
 
 	respJson := th.get("api/file")
 
-	if total := int(getJsonField(t, respJson, "total").(float64)); total != 5 {
-		t.Fatalf("wrong total: %d", total)
-	}
+	th.assertEqualsJsonPath(respJson, 5, "total")
 
 	th.assertEqualsJsonPath(respJson, "eee", "page", "0", "name")
 	th.assertEqualsJsonPath(respJson, "ddd", "page", "1", "name")
@@ -199,9 +201,7 @@ func TestListOlderFirst(t *testing.T) {
 
 	respJson := th.get("api/file?sort=uploaded,asc")
 
-	if total := int(getJsonField(t, respJson, "total").(float64)); total != 5 {
-		t.Fatalf("wrong total: %d", total)
-	}
+	th.assertEqualsJsonPath(respJson, 5, "total")
 
 	th.assertEqualsJsonPath(respJson, "aaa.mp3", "page", "0", "name")
 	th.assertEqualsJsonPath(respJson, "bbb.txt", "page", "1", "name")
