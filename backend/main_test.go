@@ -105,6 +105,13 @@ func (th testHelper) getExpectedStatus(path string, expectedStatus int) {
 		th.assertEquals(expectedStatus, resp.StatusCode)
 	}
 }
+func (th testHelper) postExpectedStatus(path string, bodyJson M, expectedStatus int) {
+	if resp, err := http.Post(fmt.Sprintf("%s/%s", th.ts.URL, path), "application/json", toJson(bodyJson)); err != nil {
+		th.t.FailNow()
+	} else {
+		th.assertEquals(expectedStatus, resp.StatusCode)
+	}
+}
 
 func (th testHelper) assertEqualsJsonPath(json M, expectedVal interface{}, path ...string) {
 	val := query(json, path...)
@@ -124,17 +131,23 @@ func (th testHelper) assertEquals(expected interface{}, actual interface{}) {
 }
 
 func withSampleFiles(t *testing.T, testLogic func(th testHelper)) {
+	withTestHelper(t, func(th testHelper) {
+		th.setupFiles()
+		testLogic(th)
+	})
+}
+
+func withTestHelper(t *testing.T, testLogic func(th testHelper)) {
 	ts := httptest.NewServer(setupServer())
 	defer ts.Close()
 	th := testHelper{t, ts}
-	th.setupFiles()
+
+	cleanupMemStorage()
 
 	testLogic(th)
 }
 
 func (th testHelper) setupFiles() {
-	cleanupMemStorage()
-
 	for _, f := range []M{
 		{
 			"name": "aaa.mp3",
@@ -277,16 +290,47 @@ func TestListPageVeryLargeProducesEmptyPage(t *testing.T) {
 	})
 }
 func TestListPageSizeNegativeProduces400(t *testing.T) {
+	withSampleFiles(t, func(th testHelper) {
+		th.getExpectedStatus("api/file?pageSize=-7", http.StatusBadRequest)
+	})
 }
 func TestUploadEmptyNameProduces400(t *testing.T) {
+	withTestHelper(t, func(th testHelper) {
+		th.postExpectedStatus("api/file/upload", M{
+			"name": "",
+			"size": 100,
+		}, http.StatusBadRequest)
+	})
 }
 func TestUploadOmittedNameProduces400(t *testing.T) {
+	withTestHelper(t, func(th testHelper) {
+		th.postExpectedStatus("api/file/upload", M{
+			"size": 100,
+		}, http.StatusBadRequest)
+	})
 }
 func TestUploadOmittedSizeProduces400(t *testing.T) {
+	withTestHelper(t, func(th testHelper) {
+		th.postExpectedStatus("api/file/upload", M{
+			"name": "name.txt",
+		}, http.StatusBadRequest)
+	})
 }
 func TestUploadZeroSizeIsOk(t *testing.T) {
+	withTestHelper(t, func(th testHelper) {
+		th.postExpectedStatus("api/file/upload", M{
+			"name": "name.txt",
+			"size": 0,
+		}, http.StatusCreated)
+	})
 }
 func TestUploadNegativeSizeProduces400(t *testing.T) {
+	withTestHelper(t, func(th testHelper) {
+		th.postExpectedStatus("api/file/upload", M{
+			"name": "name.txt",
+			"size": -100,
+		}, http.StatusBadRequest)
+	})
 }
 func TestDeleteExistingOk(t *testing.T) {
 }
