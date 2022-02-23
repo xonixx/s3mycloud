@@ -103,8 +103,12 @@ func (th testHelper) getExpectStatus(path string, expectedStatus int) M {
 	}
 	return nil
 }
-func (th testHelper) deleteExpectStatus(path string, expectedStatus int) M {
-	if req, err := http.NewRequest("DELETE", fmt.Sprintf("%s/%s", th.ts.URL, path), nil); err != nil {
+func (th testHelper) deleteExpectStatus(path string, bodyJson interface{}, expectedStatus int) M {
+	var body io.Reader
+	if bodyJson != nil {
+		body = toJson(bodyJson)
+	}
+	if req, err := http.NewRequest("DELETE", fmt.Sprintf("%s/%s", th.ts.URL, path), body); err != nil {
 		th.t.FailNow()
 	} else {
 		if resp, err1 := http.DefaultClient.Do(req); err1 != nil {
@@ -169,7 +173,8 @@ func withTestHelper(t *testing.T, testLogic func(th testHelper)) {
 	testLogic(th)
 }
 
-var existingTag = "document"
+const existingTag = "document"
+const nonExistingTag = "tagDoesNotExist"
 
 func (th *testHelper) setupFiles() {
 	th.fileJsons = nil
@@ -367,13 +372,13 @@ func TestUploadNegativeSizeProduces400(t *testing.T) {
 }
 func TestDeleteExistingOk(t *testing.T) {
 	withSampleFiles(t, func(th testHelper) {
-		respJson := th.deleteExpectStatus(fmt.Sprintf("api/file/%s", th.existingId()), http.StatusOK)
+		respJson := th.deleteExpectStatus(fmt.Sprintf("api/file/%s", th.existingId()), nil, http.StatusOK)
 		th.assertEqualsJsonPath(respJson, true, "success")
 	})
 }
 func TestDeleteWrongIdProduces404(t *testing.T) {
 	withSampleFiles(t, func(th testHelper) {
-		respJson := th.deleteExpectStatus(fmt.Sprintf("api/file/%s", th.nonExistingId()), http.StatusNotFound)
+		respJson := th.deleteExpectStatus(fmt.Sprintf("api/file/%s", th.nonExistingId()), nil, http.StatusNotFound)
 		th.assertEqualsJsonPath(respJson, "file not found", "error")
 	})
 }
@@ -390,8 +395,20 @@ func TestAssignTagWrongFileProduces404(t *testing.T) {
 	})
 }
 func TestRemoveTagOk(t *testing.T) {
+	withSampleFiles(t, func(th testHelper) {
+		respJson := th.deleteExpectStatus(fmt.Sprintf("api/file/%s/tags", th.existingId()), []string{existingTag}, http.StatusOK)
+		th.assertEqualsJsonPath(respJson, true, "success")
+	})
 }
 func TestRemoveTagWrongFileProduces404(t *testing.T) {
+	withSampleFiles(t, func(th testHelper) {
+		respJson := th.deleteExpectStatus(fmt.Sprintf("api/file/%s/tags", th.nonExistingId()), []string{existingTag}, http.StatusNotFound)
+		th.assertEqualsJsonPath(respJson, "file not found", "error")
+	})
 }
 func TestRemoveWrongTagProduces404(t *testing.T) {
+	withSampleFiles(t, func(th testHelper) {
+		respJson := th.deleteExpectStatus(fmt.Sprintf("api/file/%s/tags", th.existingId()), []string{nonExistingTag}, http.StatusNotFound)
+		th.assertEqualsJsonPath(respJson, "tag not found", "error")
+	})
 }
