@@ -389,6 +389,15 @@ func TestListFilterNameNotFound(t *testing.T) {
 	})
 }
 func TestListComplex(t *testing.T) {
+	// sorting(name) + paging + tags
+	withSampleFiles(t, func(th testHelper) {
+		respJson := th.getExpectStatus("api/file?sort=name,desc&pageSize=1&page=1&tags=text", http.StatusOK)
+
+		th.assertEqualsJsonPath(respJson, 2, "total")
+
+		th.assertEquals(1, len(query(respJson, "page").([]interface{})))
+		th.assertEqualsJsonPath(respJson, "bbb.txt", "page", "0", "name")
+	})
 }
 func TestListPageNegativeProduces400(t *testing.T) {
 	withSampleFiles(t, func(th testHelper) {
