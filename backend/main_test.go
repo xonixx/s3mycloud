@@ -198,7 +198,7 @@ func (th *testHelper) setupFiles() {
 			"size": 200,
 		},
 		{
-			"name": "eee",
+			"name": "eee.txt",
 			"size": 500,
 			"tags": []string{"text"},
 		},
@@ -257,7 +257,7 @@ func TestListAllDefaults(t *testing.T) {
 
 		th.assertEqualsJsonPath(respJson, 5, "total")
 
-		th.assertEqualsJsonPath(respJson, "eee", "page", "0", "name")
+		th.assertEqualsJsonPath(respJson, "eee.txt", "page", "0", "name")
 		th.assertEqualsJsonPath(respJson, "ddd", "page", "1", "name")
 		th.assertEqualsJsonPath(respJson, "ccc", "page", "2", "name")
 		th.assertEqualsJsonPath(respJson, "bbb.txt", "page", "3", "name")
@@ -275,7 +275,7 @@ func TestListOlderFirst(t *testing.T) {
 		th.assertEqualsJsonPath(respJson, "bbb.txt", "page", "1", "name")
 		th.assertEqualsJsonPath(respJson, "ccc", "page", "2", "name")
 		th.assertEqualsJsonPath(respJson, "ddd", "page", "3", "name")
-		th.assertEqualsJsonPath(respJson, "eee", "page", "4", "name")
+		th.assertEqualsJsonPath(respJson, "eee.txt", "page", "4", "name")
 	})
 }
 
@@ -293,7 +293,7 @@ func TestListDefaultPageSize(t *testing.T) { // mock default pageSize
 
 		th.assertEquals(int(DefaultPageSize), len(query(respJson, "page").([]interface{})))
 
-		th.assertEqualsJsonPath(respJson, "eee", "page", "0", "name")
+		th.assertEqualsJsonPath(respJson, "eee.txt", "page", "0", "name")
 		th.assertEqualsJsonPath(respJson, "ddd", "page", "1", "name")
 	})
 }
@@ -326,7 +326,7 @@ func TestListFilterSingleTag(t *testing.T) {
 		th.assertEqualsJsonPath(respJson, 2, "total")
 
 		th.assertEquals(2, len(query(respJson, "page").([]interface{})))
-		th.assertEqualsJsonPath(respJson, "eee", "page", "0", "name")
+		th.assertEqualsJsonPath(respJson, "eee.txt", "page", "0", "name")
 		th.assertEqualsJsonPath(respJson, "bbb.txt", "page", "1", "name")
 	})
 }
@@ -340,7 +340,34 @@ func TestListFilterMultipleTagsWithAndLogic(t *testing.T) {
 		th.assertEqualsJsonPath(respJson, "bbb.txt", "page", "0", "name")
 	})
 }
+func TestListFilterMultipleTagsWithAndLogicNotFound(t *testing.T) {
+	withSampleFiles(t, func(th testHelper) {
+		respJson := th.getExpectStatus("api/file?tags=text,"+nonExistingTag, http.StatusOK)
+
+		th.assertEqualsJsonPath(respJson, 0, "total")
+
+		th.assertEquals(0, len(query(respJson, "page").([]interface{})))
+	})
+}
 func TestListFilterName(t *testing.T) {
+	withSampleFiles(t, func(th testHelper) {
+		respJson := th.getExpectStatus("api/file?name=txt", http.StatusOK)
+
+		th.assertEqualsJsonPath(respJson, 2, "total")
+
+		th.assertEquals(2, len(query(respJson, "page").([]interface{})))
+		th.assertEqualsJsonPath(respJson, "eee.txt", "page", "0", "name")
+		th.assertEqualsJsonPath(respJson, "bbb.txt", "page", "1", "name")
+	})
+}
+func TestListFilterNameNotFound(t *testing.T) {
+	withSampleFiles(t, func(th testHelper) {
+		respJson := th.getExpectStatus("api/file?name=absentName", http.StatusOK)
+
+		th.assertEqualsJsonPath(respJson, 0, "total")
+
+		th.assertEquals(0, len(query(respJson, "page").([]interface{})))
+	})
 }
 func TestListComplex(t *testing.T) {
 }
