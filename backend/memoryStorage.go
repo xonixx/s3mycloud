@@ -75,7 +75,7 @@ func listFiles(listQuery listFilesQueryRequest) listFilesResponse {
 		}
 	}
 	total := len(matched)
-	var page []listFileRecord
+	var page = make([]listFileRecord, 0)
 	var from, to int
 	from = int(listQuery.Page * listQuery.PageSize)
 	to = from + int(listQuery.PageSize)
@@ -102,8 +102,10 @@ func listFiles(listQuery listFilesQueryRequest) listFilesResponse {
 			}
 		})
 	}
-	for _, f := range matched[from:to] {
-		page = append(page, listFileRecordOf(f))
+	if from <= total {
+		for _, f := range matched[from:to] {
+			page = append(page, listFileRecordOf(f))
+		}
 	}
 	return listFilesResponse{
 		Page:  page,

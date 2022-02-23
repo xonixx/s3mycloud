@@ -263,8 +263,18 @@ func TestListPageNegativeProduces400(t *testing.T) {
 	})
 }
 func TestListPageNotANumberProduces400(t *testing.T) {
+	withSampleFiles(t, func(th testHelper) {
+		th.getExpectedStatus("api/file?page=P", http.StatusBadRequest)
+	})
 }
 func TestListPageVeryLargeProducesEmptyPage(t *testing.T) {
+	withSampleFiles(t, func(th testHelper) {
+		respJson := th.get("api/file?page=1000000")
+
+		th.assertEqualsJsonPath(respJson, 5, "total")
+
+		th.assertEquals(0, len(query(respJson, "page").([]interface{})))
+	})
 }
 func TestListPageSizeNegativeProduces400(t *testing.T) {
 }
