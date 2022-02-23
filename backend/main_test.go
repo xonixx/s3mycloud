@@ -116,7 +116,7 @@ func (th testHelper) deleteExpectStatus(path string, expectedStatus int) M {
 	}
 	return nil
 }
-func (th testHelper) postExpectStatus(path string, bodyJson M, expectedStatus int) M {
+func (th testHelper) postExpectStatus(path string, bodyJson interface{}, expectedStatus int) M {
 	if resp, err := http.Post(fmt.Sprintf("%s/%s", th.ts.URL, path), "application/json", toJson(bodyJson)); err != nil {
 		th.t.FailNow()
 	} else {
@@ -209,7 +209,10 @@ func (th *testHelper) setupFiles() {
 }
 
 func (th testHelper) existingId() string {
-	return fmt.Sprintf("api/file/%s", query(th.fileJsons[1], "id").(string))
+	return query(th.fileJsons[1], "id").(string)
+}
+func (th testHelper) nonExistingId() string {
+	return "doesNotExist"
 }
 
 func TestUploadFileSuccess(t *testing.T) {
@@ -364,19 +367,27 @@ func TestUploadNegativeSizeProduces400(t *testing.T) {
 }
 func TestDeleteExistingOk(t *testing.T) {
 	withSampleFiles(t, func(th testHelper) {
-		respJson := th.deleteExpectStatus(th.existingId(), http.StatusOK)
+		respJson := th.deleteExpectStatus(fmt.Sprintf("api/file/%s", th.existingId()), http.StatusOK)
 		th.assertEqualsJsonPath(respJson, true, "success")
 	})
 }
 func TestDeleteWrongIdProduces404(t *testing.T) {
 	withSampleFiles(t, func(th testHelper) {
-		respJson := th.deleteExpectStatus("api/file/doesNotExist", http.StatusNotFound)
+		respJson := th.deleteExpectStatus(fmt.Sprintf("api/file/%s", th.nonExistingId()), http.StatusNotFound)
 		th.assertEqualsJsonPath(respJson, "file not found", "error")
 	})
 }
 func TestAssignTagOk(t *testing.T) {
+	withSampleFiles(t, func(th testHelper) {
+		respJson := th.postExpectStatus(fmt.Sprintf("api/file/%s/tags", th.existingId()), []string{"tag2", "tag3"}, http.StatusOK)
+		th.assertEqualsJsonPath(respJson, true, "success")
+	})
 }
 func TestAssignTagWrongFileProduces404(t *testing.T) {
+	withSampleFiles(t, func(th testHelper) {
+		respJson := th.postExpectStatus(fmt.Sprintf("api/file/%s/tags", th.nonExistingId()), []string{"tag2", "tag3"}, http.StatusNotFound)
+		th.assertEqualsJsonPath(respJson, "file not found", "error")
+	})
 }
 func TestRemoveTagOk(t *testing.T) {
 }
