@@ -123,6 +123,15 @@ func (th testHelper) assertEquals(expected interface{}, actual interface{}) {
 	}
 }
 
+func withSampleFiles(t *testing.T, testLogic func(th testHelper)) {
+	ts := httptest.NewServer(setupServer())
+	defer ts.Close()
+	th := testHelper{t, ts}
+	th.setupFiles()
+
+	testLogic(th)
+}
+
 func (th testHelper) setupFiles() {
 	cleanupMemStorage()
 
@@ -191,59 +200,50 @@ func TestUploadFileSuccess(t *testing.T) {
 }
 
 func TestListAllDefaults(t *testing.T) {
-	ts := httptest.NewServer(setupServer())
-	defer ts.Close()
-	th := testHelper{t, ts}
-	th.setupFiles()
+	withSampleFiles(t, func(th testHelper) {
+		respJson := th.get("api/file")
 
-	respJson := th.get("api/file")
+		th.assertEqualsJsonPath(respJson, 5, "total")
 
-	th.assertEqualsJsonPath(respJson, 5, "total")
-
-	th.assertEqualsJsonPath(respJson, "eee", "page", "0", "name")
-	th.assertEqualsJsonPath(respJson, "ddd", "page", "1", "name")
-	th.assertEqualsJsonPath(respJson, "ccc", "page", "2", "name")
-	th.assertEqualsJsonPath(respJson, "bbb.txt", "page", "3", "name")
-	th.assertEqualsJsonPath(respJson, "aaa.mp3", "page", "4", "name")
+		th.assertEqualsJsonPath(respJson, "eee", "page", "0", "name")
+		th.assertEqualsJsonPath(respJson, "ddd", "page", "1", "name")
+		th.assertEqualsJsonPath(respJson, "ccc", "page", "2", "name")
+		th.assertEqualsJsonPath(respJson, "bbb.txt", "page", "3", "name")
+		th.assertEqualsJsonPath(respJson, "aaa.mp3", "page", "4", "name")
+	})
 }
 
 func TestListOlderFirst(t *testing.T) {
-	ts := httptest.NewServer(setupServer())
-	defer ts.Close()
-	th := testHelper{t, ts}
-	th.setupFiles()
+	withSampleFiles(t, func(th testHelper) {
+		respJson := th.get("api/file?sort=uploaded,asc")
 
-	respJson := th.get("api/file?sort=uploaded,asc")
+		th.assertEqualsJsonPath(respJson, 5, "total")
 
-	th.assertEqualsJsonPath(respJson, 5, "total")
-
-	th.assertEqualsJsonPath(respJson, "aaa.mp3", "page", "0", "name")
-	th.assertEqualsJsonPath(respJson, "bbb.txt", "page", "1", "name")
-	th.assertEqualsJsonPath(respJson, "ccc", "page", "2", "name")
-	th.assertEqualsJsonPath(respJson, "ddd", "page", "3", "name")
-	th.assertEqualsJsonPath(respJson, "eee", "page", "4", "name")
+		th.assertEqualsJsonPath(respJson, "aaa.mp3", "page", "0", "name")
+		th.assertEqualsJsonPath(respJson, "bbb.txt", "page", "1", "name")
+		th.assertEqualsJsonPath(respJson, "ccc", "page", "2", "name")
+		th.assertEqualsJsonPath(respJson, "ddd", "page", "3", "name")
+		th.assertEqualsJsonPath(respJson, "eee", "page", "4", "name")
+	})
 }
 
 func TestListDefaultPageSize(t *testing.T) { // mock default pageSize
-	ts := httptest.NewServer(setupServer())
-	defer ts.Close()
-	th := testHelper{t, ts}
-	th.setupFiles()
+	withSampleFiles(t, func(th testHelper) {
+		keepDefaultPageSize := DefaultPageSize
+		DefaultPageSize = 2
+		defer func() {
+			DefaultPageSize = keepDefaultPageSize
+		}()
 
-	keepDefaultPageSize := DefaultPageSize
-	DefaultPageSize = 2
-	defer func() {
-		DefaultPageSize = keepDefaultPageSize
-	}()
+		respJson := th.get("api/file")
 
-	respJson := th.get("api/file")
+		th.assertEqualsJsonPath(respJson, 5, "total")
 
-	th.assertEqualsJsonPath(respJson, 5, "total")
+		th.assertEquals(int(DefaultPageSize), len(query(respJson, "page").([]interface{})))
 
-	th.assertEquals(int(DefaultPageSize), len(query(respJson, "page").([]interface{})))
-
-	th.assertEqualsJsonPath(respJson, "eee", "page", "0", "name")
-	th.assertEqualsJsonPath(respJson, "ddd", "page", "1", "name")
+		th.assertEqualsJsonPath(respJson, "eee", "page", "0", "name")
+		th.assertEqualsJsonPath(respJson, "ddd", "page", "1", "name")
+	})
 }
 func TestListPaging(t *testing.T) {
 }
@@ -258,12 +258,9 @@ func TestListFilterName(t *testing.T) {
 func TestListComplex(t *testing.T) {
 }
 func TestListPageNegativeProduces400(t *testing.T) {
-	ts := httptest.NewServer(setupServer())
-	defer ts.Close()
-	th := testHelper{t, ts}
-	th.setupFiles()
-
-	th.getExpectedStatus("api/file?page=-7", http.StatusBadRequest)
+	withSampleFiles(t, func(th testHelper) {
+		th.getExpectedStatus("api/file?page=-7", http.StatusBadRequest)
+	})
 }
 func TestListPageNotANumberProduces400(t *testing.T) {
 }
