@@ -98,6 +98,14 @@ func (th testHelper) get(path string) M {
 	return checkAndReadRespJson(th.t, resp, err, http.StatusOK)
 }
 
+func (th testHelper) getExpectedStatus(path string, expectedStatus int) {
+	if resp, err := http.Get(fmt.Sprintf("%s/%s", th.ts.URL, path)); err != nil {
+		th.t.FailNow()
+	} else {
+		th.assertEquals(expectedStatus, resp.StatusCode)
+	}
+}
+
 func (th testHelper) assertEqualsJsonPath(json M, expectedVal interface{}, path ...string) {
 	val := query(json, path...)
 	if _, ok := expectedVal.(int); ok {
@@ -250,6 +258,12 @@ func TestListFilterName(t *testing.T) {
 func TestListComplex(t *testing.T) {
 }
 func TestListPageNegativeProduces400(t *testing.T) {
+	ts := httptest.NewServer(setupServer())
+	defer ts.Close()
+	th := testHelper{t, ts}
+	th.setupFiles()
+
+	th.getExpectedStatus("api/file?page=-7", http.StatusBadRequest)
 }
 func TestListPageNotANumberProduces400(t *testing.T) {
 }
