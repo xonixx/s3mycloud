@@ -99,9 +99,7 @@ func (th testHelper) getExpectStatus(path string, expectedStatus int) M {
 		th.t.FailNow()
 	} else {
 		th.assertEquals(expectedStatus, resp.StatusCode)
-		if http.StatusOK == expectedStatus {
-			return checkAndReadRespJson(th.t, resp, err, http.StatusOK)
-		}
+		return tryGetBodyJson(th, resp)
 	}
 	return nil
 }
@@ -113,9 +111,7 @@ func (th testHelper) deleteExpectStatus(path string, expectedStatus int) M {
 			th.t.FailNow()
 		} else {
 			th.assertEquals(expectedStatus, resp.StatusCode)
-			if http.StatusOK == expectedStatus {
-				return checkAndReadRespJson(th.t, resp, err, http.StatusOK)
-			}
+			return tryGetBodyJson(th, resp)
 		}
 	}
 	return nil
@@ -125,10 +121,17 @@ func (th testHelper) postExpectStatus(path string, bodyJson M, expectedStatus in
 		th.t.FailNow()
 	} else {
 		th.assertEquals(expectedStatus, resp.StatusCode)
-		if http.StatusOK == expectedStatus {
-			return checkAndReadRespJson(th.t, resp, err, http.StatusOK)
-		}
+		return tryGetBodyJson(th, resp)
 	}
+	return nil
+}
+func tryGetBodyJson(th testHelper, resp *http.Response) M {
+	val, ok := resp.Header["Content-Type"]
+
+	if ok && val[0] == "application/json; charset=utf-8" {
+		return readJsonAsMap(th.t, resp)
+	}
+
 	return nil
 }
 
@@ -367,7 +370,8 @@ func TestDeleteExistingOk(t *testing.T) {
 }
 func TestDeleteWrongIdProduces404(t *testing.T) {
 	withSampleFiles(t, func(th testHelper) {
-		th.deleteExpectStatus("api/file/doesNotExist", http.StatusNotFound)
+		respJson := th.deleteExpectStatus("api/file/doesNotExist", http.StatusNotFound)
+		th.assertEqualsJsonPath(respJson, "file not found", "error")
 	})
 }
 func TestAssignTagOk(t *testing.T) {
