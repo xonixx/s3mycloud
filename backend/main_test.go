@@ -8,6 +8,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
+	"runtime/debug"
 	"strconv"
 	"testing"
 )
@@ -104,8 +105,13 @@ func (th testHelper) assertEqualsJsonPath(json M, expectedVal interface{}, path 
 			val = int(floatVal)
 		}
 	}
-	if val != expectedVal {
-		th.t.Fatalf("expected %v != actual %v", expectedVal, val)
+	th.assertEquals(expectedVal, val)
+}
+
+func (th testHelper) assertEquals(expected interface{}, actual interface{}) {
+	if expected != actual {
+		debug.PrintStack()
+		th.t.Fatalf("expected %v != actual %v", expected, actual)
 	}
 }
 
@@ -211,6 +217,25 @@ func TestListOlderFirst(t *testing.T) {
 }
 
 func TestListDefaultPageSize(t *testing.T) { // mock default pageSize
+	ts := httptest.NewServer(setupServer())
+	defer ts.Close()
+	th := testHelper{t, ts}
+	th.setupFiles()
+
+	keepDefaultPageSize := DefaultPageSize
+	DefaultPageSize = 2
+	defer func() {
+		DefaultPageSize = keepDefaultPageSize
+	}()
+
+	respJson := th.get("api/file")
+
+	th.assertEqualsJsonPath(respJson, 5, "total")
+
+	th.assertEquals(int(DefaultPageSize), len(query(respJson, "page").([]interface{})))
+
+	th.assertEqualsJsonPath(respJson, "eee", "page", "0", "name")
+	th.assertEqualsJsonPath(respJson, "ddd", "page", "1", "name")
 }
 func TestListPaging(t *testing.T) {
 }

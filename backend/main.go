@@ -23,13 +23,15 @@ func uploadMetadataHandler(c *gin.Context) {
 	c.IndentedJSON(http.StatusCreated, response)
 }
 
+var DefaultPageSize uint = 10
+
 func listFilesHandler(c *gin.Context) {
 	var listQuery listFilesQueryRequest
 	if err := c.BindQuery(&listQuery); err != nil {
 		return
 	}
 	if listQuery.PageSize == 0 {
-		listQuery.PageSize = 10
+		listQuery.PageSize = DefaultPageSize
 	}
 	if len(listQuery.Sort) == 0 {
 		listQuery.Sort = []string{"uploaded", "desc"}
