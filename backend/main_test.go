@@ -200,6 +200,7 @@ func (th *testHelper) setupFiles() {
 		{
 			"name": "eee",
 			"size": 500,
+			"tags": []string{"text"},
 		},
 	} {
 		resp, err := http.Post(fmt.Sprintf("%s/api/file/upload", th.ts.URL), "application/json", toJson(f))
@@ -297,12 +298,47 @@ func TestListDefaultPageSize(t *testing.T) { // mock default pageSize
 	})
 }
 func TestListPaging(t *testing.T) {
+	withSampleFiles(t, func(th testHelper) {
+		respJson := th.getExpectStatus("api/file?page=1&pageSize=2", http.StatusOK)
+
+		th.assertEqualsJsonPath(respJson, 5, "total")
+
+		th.assertEquals(2, len(query(respJson, "page").([]interface{})))
+		th.assertEqualsJsonPath(respJson, "ccc", "page", "0", "name")
+		th.assertEqualsJsonPath(respJson, "bbb.txt", "page", "1", "name")
+	})
 }
 func TestListPagingSorting(t *testing.T) {
+	withSampleFiles(t, func(th testHelper) {
+		respJson := th.getExpectStatus("api/file?page=1&pageSize=2&sort=size,desc", http.StatusOK)
+
+		th.assertEqualsJsonPath(respJson, 5, "total")
+
+		th.assertEquals(2, len(query(respJson, "page").([]interface{})))
+		th.assertEqualsJsonPath(respJson, "ddd", "page", "0", "name")
+		th.assertEqualsJsonPath(respJson, "bbb.txt", "page", "1", "name")
+	})
 }
 func TestListFilterSingleTag(t *testing.T) {
+	withSampleFiles(t, func(th testHelper) {
+		respJson := th.getExpectStatus("api/file?tags=text", http.StatusOK)
+
+		th.assertEqualsJsonPath(respJson, 2, "total")
+
+		th.assertEquals(2, len(query(respJson, "page").([]interface{})))
+		th.assertEqualsJsonPath(respJson, "eee", "page", "0", "name")
+		th.assertEqualsJsonPath(respJson, "bbb.txt", "page", "1", "name")
+	})
 }
 func TestListFilterMultipleTagsWithAndLogic(t *testing.T) {
+	withSampleFiles(t, func(th testHelper) {
+		respJson := th.getExpectStatus("api/file?tags=text,"+existingTag, http.StatusOK)
+
+		th.assertEqualsJsonPath(respJson, 1, "total")
+
+		th.assertEquals(1, len(query(respJson, "page").([]interface{})))
+		th.assertEqualsJsonPath(respJson, "bbb.txt", "page", "0", "name")
+	})
 }
 func TestListFilterName(t *testing.T) {
 }
