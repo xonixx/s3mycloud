@@ -8,7 +8,9 @@ import (
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
+	"reflect"
 	"runtime/debug"
+	"sort"
 	"strconv"
 	"testing"
 )
@@ -21,6 +23,14 @@ func toJson(v interface{}) io.Reader {
 	} else {
 		panic(err)
 	}
+}
+
+func toStringList(list []interface{}) []string {
+	var res []string = nil
+	for _, e := range list {
+		res = append(res, e.(string))
+	}
+	return res
 }
 
 func checkResponse(t *testing.T, resp *http.Response, err error, expectedStatus int) {
@@ -150,7 +160,13 @@ func (th testHelper) assertEqualsJsonPath(json M, expectedVal interface{}, path 
 }
 
 func (th testHelper) assertEquals(expected interface{}, actual interface{}) {
-	if expected != actual {
+	var equals bool
+	if _, ok := expected.([]string); ok {
+		equals = reflect.DeepEqual(expected, actual)
+	} else {
+		equals = expected == actual
+	}
+	if !equals {
 		debug.PrintStack()
 		th.t.Fatalf("expected %v != actual %v", expected, actual)
 	}
@@ -216,6 +232,9 @@ func (th *testHelper) setupFiles() {
 
 func (th testHelper) existingId() string {
 	return query(th.fileJsons[1], "id").(string)
+}
+func (th testHelper) existingName() string {
+	return "bbb.txt"
 }
 func (th testHelper) nonExistingId() string {
 	return "doesNotExist"
@@ -449,6 +468,25 @@ func TestAssignTagOk(t *testing.T) {
 	withSampleFiles(t, func(th testHelper) {
 		respJson := th.postExpectStatus(fmt.Sprintf("api/file/%s/tags", th.existingId()), []string{"tag2", "tag3"}, http.StatusOK)
 		th.assertEqualsJsonPath(respJson, true, "success")
+	})
+}
+func TestAssignSameTagTwice(t *testing.T) {
+	withSampleFiles(t, func(th testHelper) {
+		respJson := th.postExpectStatus(fmt.Sprintf("api/file/%s/tags", th.existingId()), []string{"tag2", "tag3"}, http.StatusOK)
+		th.assertEqualsJsonPath(respJson, true, "success")
+		respJson = th.postExpectStatus(fmt.Sprintf("api/file/%s/tags", th.existingId()), []string{"tag3", "tag4"}, http.StatusOK)
+		th.assertEqualsJsonPath(respJson, true, "success")
+
+		respJson = th.getExpectStatus("api/file?name="+th.existingName(), http.StatusOK)
+
+		th.assertEqualsJsonPath(respJson, 1, "total")
+
+		th.assertEquals(1, len(query(respJson, "page").([]interface{})))
+		tags := toStringList(query(respJson, "page", "0", "tags").([]interface{}))
+		sort.Strings(tags)
+		expectedTags := []string{"text", existingTag, "tag2", "tag3", "tag4"}
+		sort.Strings(expectedTags)
+		th.assertEquals(expectedTags, tags)
 	})
 }
 func TestAssignTagWrongFileProduces404(t *testing.T) {
