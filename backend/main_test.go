@@ -94,19 +94,18 @@ type testHelper struct {
 	fileJsons []M
 }
 
-func (th testHelper) get(path string) M {
-	resp, err := http.Get(fmt.Sprintf("%s/%s", th.ts.URL, path))
-	return checkAndReadRespJson(th.t, resp, err, http.StatusOK)
-}
-
-func (th testHelper) getExpectStatus(path string, expectedStatus int) {
+func (th testHelper) getExpectStatus(path string, expectedStatus int) M {
 	if resp, err := http.Get(fmt.Sprintf("%s/%s", th.ts.URL, path)); err != nil {
 		th.t.FailNow()
 	} else {
 		th.assertEquals(expectedStatus, resp.StatusCode)
+		if http.StatusOK == expectedStatus {
+			return checkAndReadRespJson(th.t, resp, err, http.StatusOK)
+		}
 	}
+	return nil
 }
-func (th testHelper) deleteExpectStatus(path string, expectedStatus int) {
+func (th testHelper) deleteExpectStatus(path string, expectedStatus int) M {
 	if req, err := http.NewRequest("DELETE", fmt.Sprintf("%s/%s", th.ts.URL, path), nil); err != nil {
 		th.t.FailNow()
 	} else {
@@ -114,15 +113,23 @@ func (th testHelper) deleteExpectStatus(path string, expectedStatus int) {
 			th.t.FailNow()
 		} else {
 			th.assertEquals(expectedStatus, resp.StatusCode)
+			if http.StatusOK == expectedStatus {
+				return checkAndReadRespJson(th.t, resp, err, http.StatusOK)
+			}
 		}
 	}
+	return nil
 }
-func (th testHelper) postExpectStatus(path string, bodyJson M, expectedStatus int) {
+func (th testHelper) postExpectStatus(path string, bodyJson M, expectedStatus int) M {
 	if resp, err := http.Post(fmt.Sprintf("%s/%s", th.ts.URL, path), "application/json", toJson(bodyJson)); err != nil {
 		th.t.FailNow()
 	} else {
 		th.assertEquals(expectedStatus, resp.StatusCode)
+		if http.StatusOK == expectedStatus {
+			return checkAndReadRespJson(th.t, resp, err, http.StatusOK)
+		}
 	}
+	return nil
 }
 
 func (th testHelper) assertEqualsJsonPath(json M, expectedVal interface{}, path ...string) {
@@ -159,6 +166,8 @@ func withTestHelper(t *testing.T, testLogic func(th testHelper)) {
 	testLogic(th)
 }
 
+var existingTag = "document"
+
 func (th *testHelper) setupFiles() {
 	th.fileJsons = nil
 	for _, f := range []M{
@@ -170,7 +179,7 @@ func (th *testHelper) setupFiles() {
 		{
 			"name": "bbb.txt",
 			"size": 100,
-			"tags": []string{"text", "document"},
+			"tags": []string{"text", existingTag},
 		},
 		{
 			"name": "ccc",
@@ -194,6 +203,10 @@ func (th *testHelper) setupFiles() {
 		getJsonField(th.t, respJson, "id")
 		getJsonField(th.t, respJson, "uploadUrl")
 	}
+}
+
+func (th testHelper) existingId() string {
+	return fmt.Sprintf("api/file/%s", query(th.fileJsons[1], "id").(string))
 }
 
 func TestUploadFileSuccess(t *testing.T) {
@@ -228,7 +241,7 @@ func TestUploadFileSuccess(t *testing.T) {
 
 func TestListAllDefaults(t *testing.T) {
 	withSampleFiles(t, func(th testHelper) {
-		respJson := th.get("api/file")
+		respJson := th.getExpectStatus("api/file", http.StatusOK)
 
 		th.assertEqualsJsonPath(respJson, 5, "total")
 
@@ -242,7 +255,7 @@ func TestListAllDefaults(t *testing.T) {
 
 func TestListOlderFirst(t *testing.T) {
 	withSampleFiles(t, func(th testHelper) {
-		respJson := th.get("api/file?sort=uploaded,asc")
+		respJson := th.getExpectStatus("api/file?sort=uploaded,asc", http.StatusOK)
 
 		th.assertEqualsJsonPath(respJson, 5, "total")
 
@@ -262,7 +275,7 @@ func TestListDefaultPageSize(t *testing.T) { // mock default pageSize
 			DefaultPageSize = keepDefaultPageSize
 		}()
 
-		respJson := th.get("api/file")
+		respJson := th.getExpectStatus("api/file", http.StatusOK)
 
 		th.assertEqualsJsonPath(respJson, 5, "total")
 
@@ -296,7 +309,7 @@ func TestListPageNotANumberProduces400(t *testing.T) {
 }
 func TestListPageVeryLargeProducesEmptyPage(t *testing.T) {
 	withSampleFiles(t, func(th testHelper) {
-		respJson := th.get("api/file?page=1000000")
+		respJson := th.getExpectStatus("api/file?page=1000000", http.StatusOK)
 
 		th.assertEqualsJsonPath(respJson, 5, "total")
 
@@ -348,7 +361,8 @@ func TestUploadNegativeSizeProduces400(t *testing.T) {
 }
 func TestDeleteExistingOk(t *testing.T) {
 	withSampleFiles(t, func(th testHelper) {
-		th.deleteExpectStatus(fmt.Sprintf("api/file/%s", query(th.fileJsons[1], "id").(string)), http.StatusOK)
+		respJson := th.deleteExpectStatus(th.existingId(), http.StatusOK)
+		th.assertEqualsJsonPath(respJson, true, "success")
 	})
 }
 func TestDeleteWrongIdProduces404(t *testing.T) {
