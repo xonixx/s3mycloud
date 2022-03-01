@@ -528,7 +528,6 @@ func TestRemoveWrongTagProduces404(t *testing.T) {
 		th.assertEqualsJsonPath(respJson, "tag not found", "error")
 	})
 }
-
 func TestEmptyTags(t *testing.T) {
 	withSampleFiles1(t, func(th testHelper) {
 		respJson := th.getExpectStatus("api/file", http.StatusOK)
@@ -537,5 +536,12 @@ func TestEmptyTags(t *testing.T) {
 	}, M{
 		"name": "file",
 		"size": 1,
+	})
+}
+func TestEmptyPage(t *testing.T) {
+	withTestHelper(t, func(th testHelper) {
+		respJson := th.getExpectStatus("api/file", http.StatusOK)
+		fmt.Println(respJson)
+		th.assertEquals(0, len(query(respJson, "page").([]interface{})))
 	})
 }
