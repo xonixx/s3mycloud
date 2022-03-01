@@ -92,7 +92,7 @@ func query(v interface{}, path ...string) interface{} {
 				panic("Not an int: " + f)
 			}
 		} else {
-			panic(fmt.Sprintf("Not a map/list: %v", v))
+			panic(fmt.Sprintf("Not a map/list: %v -> %v", f, v))
 		}
 	}
 	return v
@@ -174,7 +174,37 @@ func (th testHelper) assertEquals(expected interface{}, actual interface{}) {
 
 func withSampleFiles(t *testing.T, testLogic func(th testHelper)) {
 	withTestHelper(t, func(th testHelper) {
-		th.setupFiles()
+		th.setupFiles([]M{
+			{
+				"name": "aaa.mp3",
+				"size": 1000_000,
+				"tags": []string{"music", "pop"},
+			},
+			{
+				"name": "bbb.txt",
+				"size": 100,
+				"tags": []string{"text", existingTag},
+			},
+			{
+				"name": "ccc",
+				"size": 0,
+			},
+			{
+				"name": "ddd",
+				"size": 200,
+			},
+			{
+				"name": "eee.txt",
+				"size": 500,
+				"tags": []string{"text"},
+			},
+		})
+		testLogic(th)
+	})
+}
+func withSampleFiles1(t *testing.T, testLogic func(th testHelper), files ...M) {
+	withTestHelper(t, func(th testHelper) {
+		th.setupFiles(files)
 		testLogic(th)
 	})
 }
@@ -192,33 +222,9 @@ func withTestHelper(t *testing.T, testLogic func(th testHelper)) {
 const existingTag = "document"
 const nonExistingTag = "tagDoesNotExist"
 
-func (th *testHelper) setupFiles() {
+func (th *testHelper) setupFiles(files []M) {
 	th.fileJsons = nil
-	for _, f := range []M{
-		{
-			"name": "aaa.mp3",
-			"size": 1000_000,
-			"tags": []string{"music", "pop"},
-		},
-		{
-			"name": "bbb.txt",
-			"size": 100,
-			"tags": []string{"text", existingTag},
-		},
-		{
-			"name": "ccc",
-			"size": 0,
-		},
-		{
-			"name": "ddd",
-			"size": 200,
-		},
-		{
-			"name": "eee.txt",
-			"size": 500,
-			"tags": []string{"text"},
-		},
-	} {
+	for _, f := range files {
 		resp, err := http.Post(fmt.Sprintf("%s/api/file/upload", th.ts.URL), "application/json", toJson(f))
 
 		//fmt.Println("resp JSON:", readJsonAsMap(t, resp))
@@ -520,5 +526,16 @@ func TestRemoveWrongTagProduces404(t *testing.T) {
 	withSampleFiles(t, func(th testHelper) {
 		respJson := th.deleteExpectStatus(fmt.Sprintf("api/file/%s/tags", th.existingId()), []string{nonExistingTag}, http.StatusNotFound)
 		th.assertEqualsJsonPath(respJson, "tag not found", "error")
+	})
+}
+
+func TestEmptyTags(t *testing.T) {
+	withSampleFiles1(t, func(th testHelper) {
+		respJson := th.getExpectStatus("api/file", http.StatusOK)
+		fmt.Println(respJson)
+		th.assertEquals(0, len(query(respJson, "page", "0", "tags").([]interface{})))
+	}, M{
+		"name": "file",
+		"size": 1,
 	})
 }
