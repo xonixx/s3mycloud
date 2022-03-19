@@ -17,15 +17,21 @@ type file struct {
 	Created int64
 }
 
-var filesMemStorage []file
-var globalId uint64
+type memoryStorage struct {
+	filesMemStorage []file
+	globalId        uint64
+}
 
-func cleanupMemStorage() {
-	filesMemStorage = nil
+func NewMemStorage() Storage {
+	return &memoryStorage{}
+}
+
+func (m *memoryStorage) cleanStorage() {
+	m.filesMemStorage = nil
 }
 
 // @returns storage-level file object
-func addFile(request uploadMetadataRequest) file {
+func (m *memoryStorage) addFile(request uploadMetadataRequest) file {
 	var f file
 	f.Name = request.Name
 	f.Size = *request.Size
@@ -35,17 +41,17 @@ func addFile(request uploadMetadataRequest) file {
 	}
 	f.Url = "https://S3/todo"
 
-	globalId += 1
-	f.Id = strconv.FormatUint(globalId, 10)
+	m.globalId += 1
+	f.Id = strconv.FormatUint(m.globalId, 10)
 	f.Created = time.Now().UnixNano()
 
-	filesMemStorage = append(filesMemStorage, f)
+	m.filesMemStorage = append(m.filesMemStorage, f)
 
 	return f
 }
 
-func findFile(id string) (int, file) {
-	for i, f := range filesMemStorage {
+func (m *memoryStorage) findFile(id string) (int, file) {
+	for i, f := range m.filesMemStorage {
 		if id == f.Id {
 			return i, f
 		}
@@ -53,9 +59,9 @@ func findFile(id string) (int, file) {
 	return -1, file{}
 }
 
-func listFiles(listQuery listFilesQueryRequest) listFilesResponse {
+func (m *memoryStorage) listFiles(listQuery listFilesQueryRequest) listFilesResponse {
 	var matched []file
-	for _, f := range filesMemStorage {
+	for _, f := range m.filesMemStorage {
 		var matchedName, matchedTags bool
 		matchedName = true
 		matchedTags = true
@@ -113,17 +119,17 @@ func listFiles(listQuery listFilesQueryRequest) listFilesResponse {
 	}
 }
 
-func removeFile(id string) error {
-	if i, _ := findFile(id); i >= 0 {
-		filesMemStorage = append(filesMemStorage[:i], filesMemStorage[i+1:]...)
+func (m *memoryStorage) removeFile(id string) error {
+	if i, _ := m.findFile(id); i >= 0 {
+		m.filesMemStorage = append(m.filesMemStorage[:i], m.filesMemStorage[i+1:]...)
 		return nil
 	} else {
 		return errors.New("file not found")
 	}
 }
 
-func assignTags(id string, tags []string) error {
-	if i, f := findFile(id); i >= 0 {
+func (m *memoryStorage) assignTags(id string, tags []string) error {
+	if i, f := m.findFile(id); i >= 0 {
 		for _, t := range tags {
 			f.Tags[t] = true
 		}
@@ -133,8 +139,8 @@ func assignTags(id string, tags []string) error {
 	}
 }
 
-func removeTags(id string, tags []string) error {
-	if i, f := findFile(id); i >= 0 {
+func (m *memoryStorage) removeTags(id string, tags []string) error {
+	if i, f := m.findFile(id); i >= 0 {
 		for _, t := range tags {
 			if !f.Tags[t] {
 				return errors.New("tag not found")

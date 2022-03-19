@@ -7,6 +7,12 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+var s = createStorage()
+
+func createStorage() Storage {
+	return NewMemStorage()
+}
+
 func uploadMetadataHandler(c *gin.Context) {
 	var newFileRequest uploadMetadataRequest
 
@@ -14,7 +20,7 @@ func uploadMetadataHandler(c *gin.Context) {
 		return
 	}
 
-	f := addFile(newFileRequest)
+	f := s.addFile(newFileRequest)
 
 	var response uploadMetadataResponse
 	response.Id = f.Id
@@ -42,12 +48,12 @@ func listFilesHandler(c *gin.Context) {
 		listQuery.Tags = strings.Split(listQuery.Tags[0], ",")
 	}
 	//fmt.Println("listQuery:", listQuery)
-	c.IndentedJSON(http.StatusOK, listFiles(listQuery))
+	c.IndentedJSON(http.StatusOK, s.listFiles(listQuery))
 }
 
 func deleteFileHandler(c *gin.Context) {
 	id := c.Param("id")
-	if e := removeFile(id); e != nil {
+	if e := s.removeFile(id); e != nil {
 		c.IndentedJSON(http.StatusNotFound, errorResponseOf(e))
 		return
 	}
@@ -60,7 +66,7 @@ func assignTagsHandler(c *gin.Context) {
 		return
 	}
 	id := c.Param("id")
-	if err := assignTags(id, tags); err != nil {
+	if err := s.assignTags(id, tags); err != nil {
 		c.IndentedJSON(http.StatusNotFound, errorResponseOf(err))
 		return
 	}
@@ -73,7 +79,7 @@ func removeTagsHandler(c *gin.Context) {
 		return
 	}
 	id := c.Param("id")
-	if err := removeTags(id, tags); err != nil {
+	if err := s.removeTags(id, tags); err != nil {
 		c.IndentedJSON(http.StatusNotFound, errorResponseOf(err))
 		return
 	}
