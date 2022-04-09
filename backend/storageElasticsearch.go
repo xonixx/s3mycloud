@@ -66,16 +66,21 @@ func toEsFileSource(f file) esFileSource {
 	}
 }
 
-/*func fromEsFile(ef esFile) file {
-	return file{
+func fromEsFile(ef esFile) file {
+	source := ef.Source
+	f := file{
 		Id:      ef.Id,
-		Name:    f.Name,
-		Size:    f.Size,
-		Tags:    stringKeys(f.Tags),
-		Url:     f.Url,
-		Created: f.Created,
+		Name:    source.Name,
+		Size:    source.Size,
+		Tags:    map[string]bool{},
+		Url:     source.Url,
+		Created: source.Created,
 	}
-}*/
+	for _, tag := range source.Tags {
+		f.Tags[tag] = true
+	}
+	return f
+}
 
 // @returns storage-level file object
 func (s *storageElasticsearch) addFile(request uploadMetadataRequest) file {
@@ -116,19 +121,18 @@ func (s *storageElasticsearch) findFile(id string) (int, file) {
 	return -1, file{}
 }
 
-/*func (s *storageElasticsearch) findFileEs(id string) *file {
+func (s *storageElasticsearch) findFileEs(id string) *file {
 	resp, err := s.esClient.Get(INDEX, id)
 	if err != nil {
 		log.Fatalf("error get: %v", err)
+	}
+	if resp.StatusCode == 404 {
 		return nil
 	}
-	//for i, f := range s.filesMemStorage {
-	//	if id == f.Id {
-	//		return &f
-	//	}
-	//}
-	return nil
-}*/
+	ef := parseJsonEsFile(resp.Body)
+	f := fromEsFile(ef)
+	return &f
+}
 
 func (s *storageElasticsearch) listFiles(listQuery listFilesQueryRequest) listFilesResponse {
 	var matched []file
@@ -206,7 +210,7 @@ func (s *storageElasticsearch) removeFile(id string) error {
 }
 
 func (s *storageElasticsearch) assignTags(id string, tags []string) error {
-	if i, f := s.findFile(id); i >= 0 {
+	if f := s.findFileEs(id); f != nil {
 		for _, t := range tags {
 			f.Tags[t] = true
 		}
