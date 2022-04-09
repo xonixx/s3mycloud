@@ -5,7 +5,6 @@ import (
 	"github.com/elastic/go-elasticsearch/v8"
 	"log"
 	"sort"
-	"strconv"
 	"strings"
 	"time"
 )
@@ -70,10 +69,8 @@ func (s *storageElasticsearch) addFile(request uploadMetadataRequest) file {
 	f.Url = "https://S3/todo"
 
 	s.globalId += 1
-	f.Id = strconv.FormatUint(s.globalId, 10)
+	//f.Id = strconv.FormatUint(s.globalId, 10)
 	f.Created = time.Now().UnixNano()
-
-	s.filesMemStorage = append(s.filesMemStorage, f)
 
 	indexResp, err := s.esClient.Index(INDEX, toJson(toEsFile(f)))
 	if err != nil {
@@ -82,6 +79,7 @@ func (s *storageElasticsearch) addFile(request uploadMetadataRequest) file {
 	log.Println("resp: ", indexResp)
 	id := parseJson(indexResp.Body)["_id"].(string)
 	f.Id = id
+	s.filesMemStorage = append(s.filesMemStorage, f)
 	log.Println("ID: ", id)
 
 	// TODO check HasErrors

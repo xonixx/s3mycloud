@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"net/http/httptest"
 	"reflect"
@@ -259,7 +260,7 @@ func TestUploadFileSuccess(t *testing.T) {
 
 	resp, err = http.Get(fmt.Sprintf("%s/api/file", ts.URL))
 	respJson = checkAndReadRespJson(t, resp, err, http.StatusOK)
-
+	log.Println("respJson", respJson)
 	th.assertEqualsJsonPath(respJson, 1, "total")
 
 	th.assertEqualsJsonPath(respJson, "file.txt", "page", "0", "name")
