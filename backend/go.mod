@@ -3,6 +3,7 @@ module s3mycloud
 go 1.17
 
 require github.com/gin-gonic/gin v1.7.7
+require github.com/elastic/go-elasticsearch/v8 v8.1.0
 
 require (
 	github.com/gin-contrib/sse v0.1.0 // indirect
