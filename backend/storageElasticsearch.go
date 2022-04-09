@@ -18,7 +18,10 @@ type storageElasticsearch struct {
 }
 
 type esFile struct {
-	Id      string
+	Id     string       `json:"_id"`
+	Source esFileSource `json:"_source"`
+}
+type esFileSource struct {
 	Name    string
 	Size    uint
 	Tags    []string
@@ -46,9 +49,9 @@ func (s *storageElasticsearch) cleanStorage() {
 	}
 }
 
-func toEsFile(f file) esFile {
-	return esFile{
-		Id:      f.Id,
+func toEsFileSource(f file) esFileSource {
+	return esFileSource{
+		//Id:      f.Id,
 		Name:    f.Name,
 		Size:    f.Size,
 		Tags:    stringKeys(f.Tags),
@@ -56,6 +59,17 @@ func toEsFile(f file) esFile {
 		Created: f.Created,
 	}
 }
+
+/*func fromEsFile(ef esFile) file {
+	return file{
+		Id:      ef.Id,
+		Name:    f.Name,
+		Size:    f.Size,
+		Tags:    stringKeys(f.Tags),
+		Url:     f.Url,
+		Created: f.Created,
+	}
+}*/
 
 // @returns storage-level file object
 func (s *storageElasticsearch) addFile(request uploadMetadataRequest) file {
@@ -72,12 +86,12 @@ func (s *storageElasticsearch) addFile(request uploadMetadataRequest) file {
 	//f.Id = strconv.FormatUint(s.globalId, 10)
 	f.Created = time.Now().UnixNano()
 
-	indexResp, err := s.esClient.Index(INDEX, toJson(toEsFile(f)))
+	indexResp, err := s.esClient.Index(INDEX, toJson(toEsFileSource(f)))
 	if err != nil {
 		log.Fatalf("Unable to index: %v", err)
 	}
 	log.Println("resp: ", indexResp)
-	id := parseJson(indexResp.Body)["_id"].(string)
+	id := parseJsonEsFile(indexResp.Body).Id
 	f.Id = id
 	s.filesMemStorage = append(s.filesMemStorage, f)
 	log.Println("ID: ", id)
@@ -95,6 +109,20 @@ func (s *storageElasticsearch) findFile(id string) (int, file) {
 	}
 	return -1, file{}
 }
+
+/*func (s *storageElasticsearch) findFileEs(id string) *file {
+	resp, err := s.esClient.Get(INDEX, id)
+	if err != nil {
+		log.Fatalf("error get: %v", err)
+		return nil
+	}
+	//for i, f := range s.filesMemStorage {
+	//	if id == f.Id {
+	//		return &f
+	//	}
+	//}
+	return nil
+}*/
 
 func (s *storageElasticsearch) listFiles(listQuery listFilesQueryRequest) listFilesResponse {
 	var matched []file

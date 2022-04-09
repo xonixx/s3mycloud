@@ -34,3 +34,14 @@ func parseJson(input io.ReadCloser) map[string]interface{} {
 	}
 	return body
 }
+
+func parseJsonEsFile(input io.ReadCloser) esFile {
+	var body esFile
+	defer input.Close()
+	if data, err := ioutil.ReadAll(input); err != nil {
+		log.Fatalf("expected error to be nil got %v", err)
+	} else if err := json.Unmarshal(data, &body); err != nil {
+		log.Fatalf("Not a JSON, got %v", err)
+	}
+	return body
+}
