@@ -10,6 +10,8 @@ import (
 	"time"
 )
 
+const INDEX = "file"
+
 type storageElasticsearch struct {
 	filesMemStorage []file
 	globalId        uint64
@@ -38,6 +40,11 @@ func NewElasticsearchStorage() Storage {
 
 func (s *storageElasticsearch) cleanStorage() {
 	s.filesMemStorage = nil
+
+	_, err := s.esClient.Indices.Delete([]string{INDEX})
+	if err != nil {
+		log.Fatalf("Unable to delete index: %v", err)
+	}
 }
 
 func toEsFile(f file) esFile {
@@ -68,7 +75,7 @@ func (s *storageElasticsearch) addFile(request uploadMetadataRequest) file {
 
 	s.filesMemStorage = append(s.filesMemStorage, f)
 
-	indexResp, err := s.esClient.Index("file", toJson(toEsFile(f)))
+	indexResp, err := s.esClient.Index(INDEX, toJson(toEsFile(f)))
 	if err != nil {
 		log.Fatalf("Unable to index: %v", err)
 	}
