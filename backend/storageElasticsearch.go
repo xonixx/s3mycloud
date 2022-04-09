@@ -157,6 +157,12 @@ func (s *storageElasticsearch) listFiles(listQuery listFilesQueryRequest) listFi
 }
 
 func (s *storageElasticsearch) removeFile(id string) error {
+	_, err := s.esClient.Delete(INDEX, id)
+	if err != nil {
+		log.Printf("Unable to delete file: %v", err)
+		return err
+	}
+
 	if i, _ := s.findFile(id); i >= 0 {
 		s.filesMemStorage = append(s.filesMemStorage[:i], s.filesMemStorage[i+1:]...)
 		return nil
