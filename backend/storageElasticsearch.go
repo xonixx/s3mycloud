@@ -43,7 +43,13 @@ func NewElasticsearchStorage() Storage {
 func (s *storageElasticsearch) cleanStorage() {
 	s.filesMemStorage = nil
 
-	_, err := s.esClient.Indices.Delete([]string{INDEX})
+	//_, err := s.esClient.Indices.Delete([]string{INDEX})
+	//if err != nil {
+	//	log.Fatalf("Unable to delete index: %v", err)
+	//}
+
+	// This is faster
+	_, err := s.esClient.DeleteByQuery([]string{INDEX}, strings.NewReader(`{"query":{"match_all":{}}}`))
 	if err != nil {
 		log.Fatalf("Unable to delete index: %v", err)
 	}
