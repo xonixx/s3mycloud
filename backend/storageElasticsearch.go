@@ -2,6 +2,8 @@ package main
 
 import (
 	"errors"
+	"github.com/elastic/go-elasticsearch/v8"
+	"log"
 	"sort"
 	"strconv"
 	"strings"
@@ -11,10 +13,18 @@ import (
 type storageElasticsearch struct {
 	filesMemStorage []file
 	globalId        uint64
+	esClient        *elasticsearch.Client
 }
 
 func NewElasticsearchStorage() Storage {
-	return &storageElasticsearch{}
+	if esClient, err := elasticsearch.NewDefaultClient(); err != nil {
+		log.Fatalf("Can't connect ES: %v", err)
+		return nil
+	} else {
+		//log.Println(esClient)
+		//log.Println(esClient.Info())
+		return &storageElasticsearch{esClient: esClient}
+	}
 }
 
 func (m *storageElasticsearch) cleanStorage() {
