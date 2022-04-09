@@ -10,7 +10,8 @@ import (
 var s = createStorage()
 
 func createStorage() Storage {
-	return NewMemStorage()
+	//return NewMemStorage()
+	return NewElasticsearchStorage()
 }
 
 func uploadMetadataHandler(c *gin.Context) {

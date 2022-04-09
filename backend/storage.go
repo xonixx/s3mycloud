@@ -8,3 +8,12 @@ type Storage interface {
 	removeTags(id string, tags []string) error
 	cleanStorage()
 }
+
+type file struct {
+	Id      string
+	Name    string
+	Size    uint
+	Tags    map[string]bool
+	Url     string // S3 URL todo
+	Created int64
+}

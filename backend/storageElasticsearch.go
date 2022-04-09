@@ -8,21 +8,21 @@ import (
 	"time"
 )
 
-type memoryStorage struct {
+type storageElasticsearch struct {
 	filesMemStorage []file
 	globalId        uint64
 }
 
-func NewMemStorage() Storage {
-	return &memoryStorage{}
+func NewElasticsearchStorage() Storage {
+	return &storageElasticsearch{}
 }
 
-func (m *memoryStorage) cleanStorage() {
+func (m *storageElasticsearch) cleanStorage() {
 	m.filesMemStorage = nil
 }
 
 // @returns storage-level file object
-func (m *memoryStorage) addFile(request uploadMetadataRequest) file {
+func (m *storageElasticsearch) addFile(request uploadMetadataRequest) file {
 	var f file
 	f.Name = request.Name
 	f.Size = *request.Size
@@ -41,7 +41,7 @@ func (m *memoryStorage) addFile(request uploadMetadataRequest) file {
 	return f
 }
 
-func (m *memoryStorage) findFile(id string) (int, file) {
+func (m *storageElasticsearch) findFile(id string) (int, file) {
 	for i, f := range m.filesMemStorage {
 		if id == f.Id {
 			return i, f
@@ -50,7 +50,7 @@ func (m *memoryStorage) findFile(id string) (int, file) {
 	return -1, file{}
 }
 
-func (m *memoryStorage) listFiles(listQuery listFilesQueryRequest) listFilesResponse {
+func (m *storageElasticsearch) listFiles(listQuery listFilesQueryRequest) listFilesResponse {
 	var matched []file
 	for _, f := range m.filesMemStorage {
 		var matchedName, matchedTags bool
@@ -110,7 +110,7 @@ func (m *memoryStorage) listFiles(listQuery listFilesQueryRequest) listFilesResp
 	}
 }
 
-func (m *memoryStorage) removeFile(id string) error {
+func (m *storageElasticsearch) removeFile(id string) error {
 	if i, _ := m.findFile(id); i >= 0 {
 		m.filesMemStorage = append(m.filesMemStorage[:i], m.filesMemStorage[i+1:]...)
 		return nil
@@ -119,7 +119,7 @@ func (m *memoryStorage) removeFile(id string) error {
 	}
 }
 
-func (m *memoryStorage) assignTags(id string, tags []string) error {
+func (m *storageElasticsearch) assignTags(id string, tags []string) error {
 	if i, f := m.findFile(id); i >= 0 {
 		for _, t := range tags {
 			f.Tags[t] = true
@@ -130,7 +130,7 @@ func (m *memoryStorage) assignTags(id string, tags []string) error {
 	}
 }
 
-func (m *memoryStorage) removeTags(id string, tags []string) error {
+func (m *storageElasticsearch) removeTags(id string, tags []string) error {
 	if i, f := m.findFile(id); i >= 0 {
 		for _, t := range tags {
 			if !f.Tags[t] {
