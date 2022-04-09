@@ -1,7 +1,6 @@
 package main
 
 import (
-	"bytes"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -16,14 +15,6 @@ import (
 )
 
 type M map[string]interface{}
-
-func toJson(v interface{}) io.Reader {
-	if bytesData, err := json.Marshal(v); err == nil {
-		return bytes.NewReader(bytesData)
-	} else {
-		panic(err)
-	}
-}
 
 func toStringList(list []interface{}) []string {
 	var res []string = nil

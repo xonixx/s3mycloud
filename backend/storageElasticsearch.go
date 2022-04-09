@@ -16,6 +16,15 @@ type storageElasticsearch struct {
 	esClient        *elasticsearch.Client
 }
 
+type esFile struct {
+	Id      string
+	Name    string
+	Size    uint
+	Tags    []string
+	Url     string // S3 URL todo
+	Created int64
+}
+
 func NewElasticsearchStorage() Storage {
 	if esClient, err := elasticsearch.NewDefaultClient(); err != nil {
 		log.Fatalf("Can't connect ES: %v", err)
@@ -27,12 +36,23 @@ func NewElasticsearchStorage() Storage {
 	}
 }
 
-func (m *storageElasticsearch) cleanStorage() {
-	m.filesMemStorage = nil
+func (s *storageElasticsearch) cleanStorage() {
+	s.filesMemStorage = nil
+}
+
+func toEsFile(f file) esFile {
+	return esFile{
+		Id:      f.Id,
+		Name:    f.Name,
+		Size:    f.Size,
+		Tags:    stringKeys(f.Tags),
+		Url:     f.Url,
+		Created: f.Created,
+	}
 }
 
 // @returns storage-level file object
-func (m *storageElasticsearch) addFile(request uploadMetadataRequest) file {
+func (s *storageElasticsearch) addFile(request uploadMetadataRequest) file {
 	var f file
 	f.Name = request.Name
 	f.Size = *request.Size
@@ -42,17 +62,28 @@ func (m *storageElasticsearch) addFile(request uploadMetadataRequest) file {
 	}
 	f.Url = "https://S3/todo"
 
-	m.globalId += 1
-	f.Id = strconv.FormatUint(m.globalId, 10)
+	s.globalId += 1
+	f.Id = strconv.FormatUint(s.globalId, 10)
 	f.Created = time.Now().UnixNano()
 
-	m.filesMemStorage = append(m.filesMemStorage, f)
+	s.filesMemStorage = append(s.filesMemStorage, f)
+
+	indexResp, err := s.esClient.Index("file", toJson(toEsFile(f)))
+	if err != nil {
+		log.Fatalf("Unable to index: %v", err)
+	}
+	defer indexResp.Body.Close()
+
+	log.Println("resp: ", indexResp)
+
+	// TODO check HasErrors
+	//f.Id = indexResp.String()
 
 	return f
 }
 
-func (m *storageElasticsearch) findFile(id string) (int, file) {
-	for i, f := range m.filesMemStorage {
+func (s *storageElasticsearch) findFile(id string) (int, file) {
+	for i, f := range s.filesMemStorage {
 		if id == f.Id {
 			return i, f
 		}
@@ -60,9 +91,9 @@ func (m *storageElasticsearch) findFile(id string) (int, file) {
 	return -1, file{}
 }
 
-func (m *storageElasticsearch) listFiles(listQuery listFilesQueryRequest) listFilesResponse {
+func (s *storageElasticsearch) listFiles(listQuery listFilesQueryRequest) listFilesResponse {
 	var matched []file
-	for _, f := range m.filesMemStorage {
+	for _, f := range s.filesMemStorage {
 		var matchedName, matchedTags bool
 		matchedName = true
 		matchedTags = true
@@ -120,17 +151,17 @@ func (m *storageElasticsearch) listFiles(listQuery listFilesQueryRequest) listFi
 	}
 }
 
-func (m *storageElasticsearch) removeFile(id string) error {
-	if i, _ := m.findFile(id); i >= 0 {
-		m.filesMemStorage = append(m.filesMemStorage[:i], m.filesMemStorage[i+1:]...)
+func (s *storageElasticsearch) removeFile(id string) error {
+	if i, _ := s.findFile(id); i >= 0 {
+		s.filesMemStorage = append(s.filesMemStorage[:i], s.filesMemStorage[i+1:]...)
 		return nil
 	} else {
 		return errors.New("file not found")
 	}
 }
 
-func (m *storageElasticsearch) assignTags(id string, tags []string) error {
-	if i, f := m.findFile(id); i >= 0 {
+func (s *storageElasticsearch) assignTags(id string, tags []string) error {
+	if i, f := s.findFile(id); i >= 0 {
 		for _, t := range tags {
 			f.Tags[t] = true
 		}
@@ -140,8 +171,8 @@ func (m *storageElasticsearch) assignTags(id string, tags []string) error {
 	}
 }
 
-func (m *storageElasticsearch) removeTags(id string, tags []string) error {
-	if i, f := m.findFile(id); i >= 0 {
+func (s *storageElasticsearch) removeTags(id string, tags []string) error {
+	if i, f := s.findFile(id); i >= 0 {
 		for _, t := range tags {
 			if !f.Tags[t] {
 				return errors.New("tag not found")
