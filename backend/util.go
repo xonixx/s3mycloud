@@ -4,6 +4,8 @@ import (
 	"bytes"
 	"encoding/json"
 	"io"
+	"io/ioutil"
+	"log"
 )
 
 func toJson(v interface{}) io.Reader {
@@ -20,4 +22,15 @@ func stringKeys(v map[string]bool) []string {
 		res = append(res, k)
 	}
 	return res
+}
+
+func parseJson(input io.ReadCloser) map[string]interface{} {
+	var body map[string]interface{}
+	defer input.Close()
+	if data, err := ioutil.ReadAll(input); err != nil {
+		log.Fatalf("expected error to be nil got %v", err)
+	} else if err := json.Unmarshal(data, &body); err != nil {
+		log.Fatalf("Not a JSON, got %v", err)
+	}
+	return body
 }

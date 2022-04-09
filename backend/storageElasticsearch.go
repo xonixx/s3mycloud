@@ -72,12 +72,12 @@ func (s *storageElasticsearch) addFile(request uploadMetadataRequest) file {
 	if err != nil {
 		log.Fatalf("Unable to index: %v", err)
 	}
-	defer indexResp.Body.Close()
-
 	log.Println("resp: ", indexResp)
+	id := parseJson(indexResp.Body)["_id"].(string)
+	f.Id = id
+	log.Println("ID: ", id)
 
 	// TODO check HasErrors
-	//f.Id = indexResp.String()
 
 	return f
 }
