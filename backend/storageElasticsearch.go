@@ -21,11 +21,11 @@ type esFile struct {
 	Source esFileSource `json:"_source"`
 }
 type esFileSource struct {
-	Name    string
-	Size    uint
-	Tags    []string
-	Url     string // S3 URL todo
-	Created int64
+	Name    string   `json:"name"`
+	Size    uint     `json:"size"`
+	Tags    []string `json:"tags"`
+	Url     string   `json:"url"` // S3 URL todo
+	Created int64    `json:"created"`
 }
 type esSearchResult struct {
 	Took     uint `json:"took"`
@@ -149,7 +149,10 @@ func (s *storageElasticsearch) findFileEs(id string) *file {
 }
 
 func (s *storageElasticsearch) listFiles(listQuery listFilesQueryRequest) listFilesResponse {
-	searchResp, err := s.esClient.Search(s.esClient.Search.WithIndex(INDEX))
+	searchResp, err := s.esClient.Search(s.esClient.Search.WithIndex(INDEX),
+		s.esClient.Search.WithBody(strings.NewReader(`{
+	"sort": [ { "created": "desc" } ]
+}`)))
 	if err != nil {
 		log.Fatalf("Unable to search: %v", err)
 	}
