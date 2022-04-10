@@ -45,3 +45,12 @@ func parseJsonEsFile(input io.ReadCloser) esFile {
 	}
 	return body
 }
+
+func parseJsonTyped(input io.ReadCloser, v interface{}) {
+	defer input.Close()
+	if data, err := ioutil.ReadAll(input); err != nil {
+		log.Fatalf("expected error to be nil got %v", err)
+	} else if err := json.Unmarshal(data, v); err != nil {
+		log.Fatalf("Not a JSON, got %v", err)
+	}
+}

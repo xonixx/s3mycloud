@@ -4,7 +4,6 @@ import (
 	"errors"
 	"github.com/elastic/go-elasticsearch/v8"
 	"log"
-	"sort"
 	"strings"
 	"time"
 )
@@ -28,6 +27,16 @@ type esFileSource struct {
 	Url     string // S3 URL todo
 	Created int64
 }
+type esSearchResult struct {
+	Took     uint `json:"took"`
+	TimedOut bool `json:"timed_out"`
+	Hits     struct {
+		Total struct {
+			Value uint `json:"value"`
+		} `json:"total"`
+		Hits []esFile `json:"hits"`
+	} `json:"hits"`
+}
 
 func NewElasticsearchStorage() Storage {
 	if esClient, err := elasticsearch.NewDefaultClient(); err != nil {
@@ -49,7 +58,8 @@ func (s *storageElasticsearch) cleanStorage() {
 	//}
 
 	// This is faster
-	_, err := s.esClient.DeleteByQuery([]string{INDEX}, strings.NewReader(`{"query":{"match_all":{}}}`))
+	_, err := s.esClient.DeleteByQuery([]string{INDEX}, strings.NewReader(`{"query":{"match_all":{}}}`),
+		s.esClient.DeleteByQuery.WithRefresh(true))
 	if err != nil {
 		log.Fatalf("Unable to delete index: %v", err)
 	}
@@ -97,12 +107,15 @@ func (s *storageElasticsearch) addFile(request uploadMetadataRequest) file {
 	//f.Id = strconv.FormatUint(s.globalId, 10)
 	f.Created = time.Now().UnixNano()
 
-	indexResp, err := s.esClient.Index(INDEX, toJson(toEsFileSource(f)))
+	indexResp, err := s.esClient.Index(INDEX, toJson(toEsFileSource(f)),
+		s.esClient.Index.WithRefresh("true"))
 	if err != nil {
 		log.Fatalf("Unable to index: %v", err)
 	}
 	log.Println("resp: ", indexResp)
-	id := parseJsonEsFile(indexResp.Body).Id
+	var ef esFile
+	parseJsonTyped(indexResp.Body, &ef)
+	id := ef.Id
 	f.Id = id
 	s.filesMemStorage = append(s.filesMemStorage, f)
 	log.Println("ID: ", id)
@@ -129,68 +142,29 @@ func (s *storageElasticsearch) findFileEs(id string) *file {
 	if resp.StatusCode == 404 {
 		return nil
 	}
-	ef := parseJsonEsFile(resp.Body)
+	var ef esFile
+	parseJsonTyped(resp.Body, &ef)
 	f := fromEsFile(ef)
 	return &f
 }
 
 func (s *storageElasticsearch) listFiles(listQuery listFilesQueryRequest) listFilesResponse {
-	var matched []file
-	for _, f := range s.filesMemStorage {
-		var matchedName, matchedTags bool
-		matchedName = true
-		matchedTags = true
-		if listQuery.Name != "" {
-			matchedName = strings.Contains(f.Name, listQuery.Name)
-		}
-		if len(listQuery.Tags) > 0 {
-			for _, tag := range listQuery.Tags {
-				if !f.Tags[tag] {
-					matchedTags = false
-					break
-				}
-			}
-		}
-		if matchedName && matchedTags {
-			matched = append(matched, f)
-		}
+	searchResp, err := s.esClient.Search(s.esClient.Search.WithIndex(INDEX))
+	if err != nil {
+		log.Fatalf("Unable to search: %v", err)
 	}
-	total := len(matched)
-	var page = make([]listFileRecord, 0)
-	var from, to int
-	from = int(listQuery.Page * listQuery.PageSize)
-	to = from + int(listQuery.PageSize)
-	if to > total {
-		to = total
+	log.Println("searchResp=", searchResp)
+	var searchRes esSearchResult
+	parseJsonTyped(searchResp.Body, &searchRes)
+
+	var page []listFileRecord
+	for _, ef := range searchRes.Hits.Hits {
+		page = append(page, listFileRecordOf(fromEsFile(ef)))
 	}
-	if len(listQuery.Sort) > 0 {
-		by := listQuery.Sort[0]
-		desc := len(listQuery.Sort) > 1 && listQuery.Sort[1] == "desc"
-		sort.SliceStable(matched, func(i, j int) bool {
-			if desc {
-				i, j = j, i
-			}
-			f1 := matched[i]
-			f2 := matched[j]
-			if by == "name" {
-				return f1.Name < f2.Name
-			} else if by == "size" {
-				return f1.Size < f2.Size
-			} else if by == "uploaded" {
-				return f1.Created < f2.Created
-			} else {
-				panic("Wrong sort by: " + by)
-			}
-		})
-	}
-	if from <= total {
-		for _, f := range matched[from:to] {
-			page = append(page, listFileRecordOf(f))
-		}
-	}
+
 	return listFilesResponse{
+		Total: searchRes.Hits.Total.Value,
 		Page:  page,
-		Total: uint(total),
 	}
 }
 
@@ -214,6 +188,7 @@ func (s *storageElasticsearch) assignTags(id string, tags []string) error {
 		for _, t := range tags {
 			f.Tags[t] = true
 		}
+		// TODO update file in ES
 		return nil
 	} else {
 		return errors.New("file not found")
@@ -221,7 +196,7 @@ func (s *storageElasticsearch) assignTags(id string, tags []string) error {
 }
 
 func (s *storageElasticsearch) removeTags(id string, tags []string) error {
-	if i, f := s.findFile(id); i >= 0 {
+	if f := s.findFileEs(id); f != nil {
 		for _, t := range tags {
 			if !f.Tags[t] {
 				return errors.New("tag not found")
@@ -230,6 +205,7 @@ func (s *storageElasticsearch) removeTags(id string, tags []string) error {
 		for _, t := range tags {
 			delete(f.Tags, t)
 		}
+		// TODO update file in ES
 		return nil
 	} else {
 		return errors.New("file not found")
