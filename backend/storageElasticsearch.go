@@ -149,12 +149,22 @@ func (s *storageElasticsearch) findFileEs(id string) *file {
 }
 
 func (s *storageElasticsearch) listFiles(listQuery listFilesQueryRequest) listFilesResponse {
+	by := listQuery.Sort[0]
+	desc := len(listQuery.Sort) > 1 && listQuery.Sort[1] == "desc"
+	sort := by
+	if by == "uploaded" {
+		sort = "created"
+	}
+	order := "asc"
+	if desc {
+		order = "desc"
+	}
 	searchResp, err := s.esClient.Search(s.esClient.Search.WithIndex(INDEX),
 		s.esClient.Search.WithBody(
 			toJson(M{
 				"from": listQuery.Page * listQuery.PageSize,
 				"size": listQuery.PageSize,
-				"sort": M{"created": "desc"},
+				"sort": M{sort: order},
 			})))
 	if err != nil {
 		log.Fatalf("Unable to search: %v", err)
