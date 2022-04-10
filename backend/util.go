@@ -8,6 +8,8 @@ import (
 	"log"
 )
 
+type M map[string]interface{}
+
 func toJson(v interface{}) io.Reader {
 	if bytesData, err := json.Marshal(v); err == nil {
 		return bytes.NewReader(bytesData)

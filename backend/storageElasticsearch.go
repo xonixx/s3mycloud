@@ -150,9 +150,10 @@ func (s *storageElasticsearch) findFileEs(id string) *file {
 
 func (s *storageElasticsearch) listFiles(listQuery listFilesQueryRequest) listFilesResponse {
 	searchResp, err := s.esClient.Search(s.esClient.Search.WithIndex(INDEX),
-		s.esClient.Search.WithBody(strings.NewReader(`{
-	"sort": [ { "created": "desc" } ]
-}`)))
+		s.esClient.Search.WithBody(
+			toJson(M{
+				"sort": M{"created": "desc"},
+			})))
 	if err != nil {
 		log.Fatalf("Unable to search: %v", err)
 	}
@@ -160,7 +161,7 @@ func (s *storageElasticsearch) listFiles(listQuery listFilesQueryRequest) listFi
 	var searchRes esSearchResult
 	parseJsonTyped(searchResp.Body, &searchRes)
 
-	var page []listFileRecord
+	page := make([]listFileRecord, 0)
 	for _, ef := range searchRes.Hits.Hits {
 		page = append(page, listFileRecordOf(fromEsFile(ef)))
 	}

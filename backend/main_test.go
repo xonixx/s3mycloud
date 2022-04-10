@@ -15,8 +15,6 @@ import (
 	"testing"
 )
 
-type M map[string]interface{}
-
 func toStringList(list []interface{}) []string {
 	var res []string = nil
 	for _, e := range list {
