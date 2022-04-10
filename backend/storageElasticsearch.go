@@ -152,6 +152,8 @@ func (s *storageElasticsearch) listFiles(listQuery listFilesQueryRequest) listFi
 	searchResp, err := s.esClient.Search(s.esClient.Search.WithIndex(INDEX),
 		s.esClient.Search.WithBody(
 			toJson(M{
+				"from": listQuery.Page * listQuery.PageSize,
+				"size": listQuery.PageSize,
 				"sort": M{"created": "desc"},
 			})))
 	if err != nil {
