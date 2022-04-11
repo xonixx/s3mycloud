@@ -154,6 +154,8 @@ func (s *storageElasticsearch) listFiles(listQuery listFilesQueryRequest) listFi
 	sort := by
 	if by == "uploaded" {
 		sort = "created"
+	} else if by == "name" {
+		sort = "name.keyword"
 	}
 	order := "asc"
 	if desc {

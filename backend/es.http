@@ -8,4 +8,10 @@ Content-Type: application/json
   "size": 1,
   "sort": {"name": "desc"}
 }
+
+###
+
+# mapping
+GET 127.0.0.1:9200/file
+
 ###
