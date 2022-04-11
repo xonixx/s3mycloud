@@ -1,0 +1,11 @@
+###
+
+GET 127.0.0.1:9200/file/_search
+Content-Type: application/json
+
+{
+  "from": 1,
+  "size": 1,
+  "sort": {"name": "desc"}
+}
+###

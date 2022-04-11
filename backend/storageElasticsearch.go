@@ -190,6 +190,9 @@ func (s *storageElasticsearch) listFiles(listQuery listFilesQueryRequest) listFi
 	if err != nil {
 		log.Fatalf("Unable to search: %v", err)
 	}
+	if searchResp.IsError() {
+		log.Fatalf("searchResp has error: %v", searchResp)
+	}
 	log.Println("searchResp=", searchResp)
 	var searchRes esSearchResult
 	parseJsonTyped(searchResp.Body, &searchRes)
