@@ -17,12 +17,13 @@ func NewMemStorage() Storage {
 	return &memoryStorage{}
 }
 
-func (m *memoryStorage) cleanStorage() {
+func (m *memoryStorage) cleanStorage() error {
 	m.filesMemStorage = nil
+	return nil
 }
 
 // @returns storage-level file object
-func (m *memoryStorage) addFile(request uploadMetadataRequest) file {
+func (m *memoryStorage) addFile(request uploadMetadataRequest) (file, error) {
 	var f file
 	f.Name = request.Name
 	f.Size = *request.Size
@@ -38,7 +39,7 @@ func (m *memoryStorage) addFile(request uploadMetadataRequest) file {
 
 	m.filesMemStorage = append(m.filesMemStorage, f)
 
-	return f
+	return f, nil
 }
 
 func (m *memoryStorage) findFile(id string) (int, file) {
@@ -50,7 +51,7 @@ func (m *memoryStorage) findFile(id string) (int, file) {
 	return -1, file{}
 }
 
-func (m *memoryStorage) listFiles(listQuery listFilesQueryRequest) listFilesResponse {
+func (m *memoryStorage) listFiles(listQuery listFilesQueryRequest) (listFilesResponse, error) {
 	var matched []file
 	for _, f := range m.filesMemStorage {
 		var matchedName, matchedTags bool
@@ -107,7 +108,7 @@ func (m *memoryStorage) listFiles(listQuery listFilesQueryRequest) listFilesResp
 	return listFilesResponse{
 		Page:  page,
 		Total: uint(total),
-	}
+	}, nil
 }
 
 func (m *memoryStorage) removeFile(id string) error {

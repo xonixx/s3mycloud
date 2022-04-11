@@ -1,12 +1,12 @@
 package main
 
 type Storage interface {
-	addFile(request uploadMetadataRequest) file
-	listFiles(listQuery listFilesQueryRequest) listFilesResponse
+	addFile(request uploadMetadataRequest) (file, error)
+	listFiles(listQuery listFilesQueryRequest) (listFilesResponse, error)
 	removeFile(id string) error
 	assignTags(id string, tags []string) error
 	removeTags(id string, tags []string) error
-	cleanStorage()
+	cleanStorage() error
 }
 
 type file struct {

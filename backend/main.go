@@ -21,7 +21,10 @@ func uploadMetadataHandler(c *gin.Context) {
 		return
 	}
 
-	f := s.addFile(newFileRequest)
+	f, err := s.addFile(newFileRequest)
+	if err != nil {
+		c.IndentedJSON(http.StatusInternalServerError, err)
+	}
 
 	var response uploadMetadataResponse
 	response.Id = f.Id
@@ -49,7 +52,12 @@ func listFilesHandler(c *gin.Context) {
 		listQuery.Tags = strings.Split(listQuery.Tags[0], ",")
 	}
 	//fmt.Println("listQuery:", listQuery)
-	c.IndentedJSON(http.StatusOK, s.listFiles(listQuery))
+	files, err := s.listFiles(listQuery)
+	if err != nil {
+		c.IndentedJSON(http.StatusInternalServerError, err)
+	} else {
+		c.IndentedJSON(http.StatusOK, files)
+	}
 }
 
 func deleteFileHandler(c *gin.Context) {
