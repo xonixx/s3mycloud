@@ -155,9 +155,9 @@ func (s *storageElasticsearch) listFiles(listQuery listFilesQueryRequest) (listF
 	sort := by
 	if by == "uploaded" {
 		sort = "created"
-	} //else if by == "name" {
-	//sort = "name.keyword"
-	//}
+	} else if by == "name" {
+		sort = "name.keyword"
+	}
 	order := "asc"
 	if desc {
 		order = "desc"
@@ -220,6 +220,9 @@ func checkError(r *esapi.Response, err error) error {
 
 func (s *storageElasticsearch) removeFile(id string) error {
 	resp, err := s.esClient.Delete(INDEX, id)
+	if resp.StatusCode == 404 {
+		return errors.New("file not found")
+	}
 	if err1 := checkError(resp, err); err1 != nil {
 		return err1
 	}
