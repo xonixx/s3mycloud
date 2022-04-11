@@ -164,14 +164,27 @@ func (s *storageElasticsearch) listFiles(listQuery listFilesQueryRequest) listFi
 		"size": listQuery.PageSize,
 		"sort": M{sort: order},
 	}
+	conditions := make([]M, 0)
 	if listQuery.Name != "" {
-		searchBody["query"] = M{
-			"query_string": M{
-				"default_field": "name",
-				"query":         "*" + listQuery.Name + "*",
-			},
-		}
+		conditions = append(conditions,
+			M{
+				"query_string": M{
+					"default_field": "name",
+					"query":         "*" + listQuery.Name + "*",
+				},
+			})
 	}
+	for _, tag := range listQuery.Tags {
+		conditions = append(conditions, M{
+			"term": M{"tags": tag},
+		})
+	}
+	searchBody["query"] = M{
+		"bool": M{
+			"filter": conditions,
+		},
+	}
+	log.Println("searchBody", searchBody)
 	searchResp, err := s.esClient.Search(s.esClient.Search.WithIndex(INDEX),
 		s.esClient.Search.WithBody(toJson(searchBody)))
 	if err != nil {
