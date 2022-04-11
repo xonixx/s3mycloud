@@ -159,13 +159,21 @@ func (s *storageElasticsearch) listFiles(listQuery listFilesQueryRequest) listFi
 	if desc {
 		order = "desc"
 	}
+	searchBody := M{
+		"from": listQuery.Page * listQuery.PageSize,
+		"size": listQuery.PageSize,
+		"sort": M{sort: order},
+	}
+	if listQuery.Name != "" {
+		searchBody["query"] = M{
+			"query_string": M{
+				"default_field": "name",
+				"query":         "*" + listQuery.Name + "*",
+			},
+		}
+	}
 	searchResp, err := s.esClient.Search(s.esClient.Search.WithIndex(INDEX),
-		s.esClient.Search.WithBody(
-			toJson(M{
-				"from": listQuery.Page * listQuery.PageSize,
-				"size": listQuery.PageSize,
-				"sort": M{sort: order},
-			})))
+		s.esClient.Search.WithBody(toJson(searchBody)))
 	if err != nil {
 		log.Fatalf("Unable to search: %v", err)
 	}
