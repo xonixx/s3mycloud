@@ -475,6 +475,17 @@ func TestAssignTagOk(t *testing.T) {
 	withSampleFiles(t, func(th testHelper) {
 		respJson := th.postExpectStatus(fmt.Sprintf("api/file/%s/tags", th.existingId()), []string{"tag2", "tag3"}, http.StatusOK)
 		th.assertEqualsJsonPath(respJson, true, "success")
+
+		respJson = th.getExpectStatus("api/file?name="+th.existingName(), http.StatusOK)
+
+		th.assertEqualsJsonPath(respJson, 1, "total")
+
+		th.assertEquals(1, len(query(respJson, "page").([]interface{})))
+		tags := toStringList(query(respJson, "page", "0", "tags").([]interface{}))
+		sort.Strings(tags)
+		expectedTags := []string{"text", existingTag, "tag2", "tag3"}
+		sort.Strings(expectedTags)
+		th.assertEquals(expectedTags, tags)
 	})
 }
 func TestAssignSameTagTwice(t *testing.T) {
