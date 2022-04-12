@@ -13,9 +13,7 @@ import (
 const INDEX = "file"
 
 type storageElasticsearch struct {
-	filesMemStorage []file
-	globalId        uint64
-	esClient        *elasticsearch.Client
+	esClient *elasticsearch.Client
 }
 
 type esFile struct {
@@ -52,8 +50,6 @@ func NewElasticsearchStorage() Storage {
 }
 
 func (s *storageElasticsearch) cleanStorage() error {
-	s.filesMemStorage = nil
-
 	//_, err := s.esClient.Indices.Delete([]string{INDEX})
 	//if err != nil {
 	//	log.Fatalf("Unable to delete index: %v", err)
@@ -106,7 +102,6 @@ func (s *storageElasticsearch) addFile(request uploadMetadataRequest) (file, err
 	}
 	f.Url = "https://S3/todo"
 
-	s.globalId += 1
 	//f.Id = strconv.FormatUint(s.globalId, 10)
 	f.Created = time.Now().UnixNano()
 
@@ -120,19 +115,9 @@ func (s *storageElasticsearch) addFile(request uploadMetadataRequest) (file, err
 	parseJsonTyped(indexResp.Body, &ef)
 	id := ef.Id
 	f.Id = id
-	s.filesMemStorage = append(s.filesMemStorage, f)
 	log.Println("ID: ", id)
 
 	return f, nil
-}
-
-func (s *storageElasticsearch) findFile(id string) (int, file) {
-	for i, f := range s.filesMemStorage {
-		if id == f.Id {
-			return i, f
-		}
-	}
-	return -1, file{}
 }
 
 func (s *storageElasticsearch) findFileEs(id string) (*file, error) {
@@ -226,13 +211,7 @@ func (s *storageElasticsearch) removeFile(id string) error {
 	if err1 := checkError(resp, err); err1 != nil {
 		return err1
 	}
-
-	if i, _ := s.findFile(id); i >= 0 {
-		s.filesMemStorage = append(s.filesMemStorage[:i], s.filesMemStorage[i+1:]...)
-		return nil
-	} else {
-		return errors.New("file not found")
-	}
+	return nil
 }
 
 func (s *storageElasticsearch) assignTags(id string, tags []string) error {
