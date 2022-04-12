@@ -244,11 +244,26 @@ func (s *storageElasticsearch) assignTags(id string, tags []string) error {
 		for _, t := range tags {
 			f.Tags[t] = true
 		}
-		// TODO update file in ES
+		err := s.updateTags(f)
+		if err != nil {
+			return err
+		}
 		return nil
 	} else {
 		return errors.New("file not found")
 	}
+}
+
+func (s *storageElasticsearch) updateTags(f *file) error {
+	resp, err := s.esClient.Update(INDEX, f.Id, toJson(M{
+		"doc": M{
+			"tags": f.tags(),
+		},
+	}), s.esClient.Update.WithRefresh("true"))
+	if err1 := checkError(resp, err); err1 != nil {
+		return err1
+	}
+	return nil
 }
 
 func (s *storageElasticsearch) removeTags(id string, tags []string) error {
@@ -265,7 +280,10 @@ func (s *storageElasticsearch) removeTags(id string, tags []string) error {
 		for _, t := range tags {
 			delete(f.Tags, t)
 		}
-		// TODO update file in ES
+		err := s.updateTags(f)
+		if err != nil {
+			return err
+		}
 		return nil
 	} else {
 		return errors.New("file not found")

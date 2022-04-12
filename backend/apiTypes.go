@@ -45,16 +45,12 @@ type listFilesResponse struct {
 type listOfTags []string
 
 func listFileRecordOf(f file) listFileRecord {
-	tags := make([]string, 0)
-	for t := range f.Tags {
-		tags = append(tags, t)
-	}
 	return listFileRecord{
 		Id:       f.Id,
 		Name:     f.Name,
 		Size:     f.Size,
 		Url:      f.Url,
-		Tags:     tags,
+		Tags:     f.tags(),
 		Uploaded: f.Created,
 	}
 }

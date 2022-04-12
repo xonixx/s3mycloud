@@ -17,3 +17,11 @@ type file struct {
 	Url     string // S3 URL todo
 	Created int64
 }
+
+func (f *file) tags() []string {
+	tags := make([]string, 0)
+	for t := range f.Tags {
+		tags = append(tags, t)
+	}
+	return tags
+}
