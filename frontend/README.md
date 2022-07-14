@@ -1,1 +1,1 @@
-S3MyCloud ReactJS frontend
+S3MyCloud frontend
