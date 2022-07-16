@@ -2,10 +2,10 @@
 </script>
 
 <template>
-  <main>
+<!--  <main>-->
     List files goes here...
 
-    <div class="columns">
+    <div class="columns" style="width: 100%">
       <div class="column">
         First column
       </div>
@@ -19,5 +19,5 @@
         Fourth column
       </div>
     </div>
-  </main>
+<!--  </main>-->
 </template>
