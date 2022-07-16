@@ -30,10 +30,41 @@ for (let i = 0; i < 20; i++) {
     </div>
   </div>
   <div>
-    <div v-for="r in searchResults">
-      {{ r.name }}
-
+    <div v-for="r in searchResults" class="res-item">
+      <span class="name">{{ r.name }}</span>
+      <span v-for="t in r.tags" class="tag is-primary is-light">{{ t }}</span>
+      <div style="margin-top: -5px">
+        <span class="date">{{ r.date }}</span>
+        <span class="size">{{ r.size }}</span>
+      </div>
     </div>
   </div>
   <!--  </main>-->
 </template>
+
+<style scoped>
+.res-item {
+  /*border: dotted 1px gray;*/
+  margin-bottom: 10px;
+}
+
+.res-item span {
+  margin: 5px;
+}
+
+.name {
+  font-weight: bold;
+}
+
+.size {
+  /*width: 90px;*/
+  /*display: inline-block;*/
+}
+
+.res-item .date {
+  margin-right: 30px;
+  /*font-size: 0.9em;*/
+  color: #888;
+  /*font-style: italic;*/
+}
+</style>
