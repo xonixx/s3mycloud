@@ -4,7 +4,7 @@ import {ref} from "vue";
 
 const searchResults = ref([])
 
-for (let i = 0; i < 20; i++) {
+for (let i = 0; i < 2; i++) {
   searchResults.value.push(
       {name: "Report for boss.xlsx", size: 50000, date: "15 Mar 2016", tags: ["document", "work"]},
       {name: "Sing Now.mp3", size: 2_500_000, date: "17 Apr 2019", tags: ["music", "pop"]},
@@ -70,6 +70,34 @@ function humanFileSize(bytes: number, si=false, dp=1) {
       </div>
     </div>
   </div>
+
+  <nav class="pagination" role="navigation" aria-label="pagination">
+    <a class="pagination-previous">Previous</a>
+    <a class="pagination-next">Next page</a>
+    <ul class="pagination-list">
+      <li>
+        <a class="pagination-link" aria-label="Goto page 1">1</a>
+      </li>
+      <li>
+        <span class="pagination-ellipsis">&hellip;</span>
+      </li>
+      <li>
+        <a class="pagination-link" aria-label="Goto page 45">45</a>
+      </li>
+      <li>
+        <a class="pagination-link is-current" aria-label="Page 46" aria-current="page">46</a>
+      </li>
+      <li>
+        <a class="pagination-link" aria-label="Goto page 47">47</a>
+      </li>
+      <li>
+        <span class="pagination-ellipsis">&hellip;</span>
+      </li>
+      <li>
+        <a class="pagination-link" aria-label="Goto page 86">86</a>
+      </li>
+    </ul>
+  </nav>
   <!--  </main>-->
 </template>
 
