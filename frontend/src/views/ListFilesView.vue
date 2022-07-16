@@ -13,5 +13,8 @@
       </a>
     </div>
   </div>
+  <div>
+    Search results go here...
+  </div>
 <!--  </main>-->
 </template>
