@@ -93,12 +93,12 @@ func fromEsFile(ef esFile) StoredFile {
 }
 
 // @returns storage-level file object
-func (s *storageElasticsearch) AddFile(request FileData) (StoredFile, error) {
+func (s *storageElasticsearch) AddFile(fileData FileData) (StoredFile, error) {
 	var f StoredFile
-	f.Name = request.Name
-	f.Size = request.Size
+	f.Name = fileData.Name
+	f.Size = fileData.Size
 	f.Tags = map[string]bool{}
-	for _, tag := range request.Tags {
+	for _, tag := range fileData.Tags {
 		f.Tags[tag] = true
 	}
 	f.Url = "https://S3/todo"

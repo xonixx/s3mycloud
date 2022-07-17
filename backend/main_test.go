@@ -200,17 +200,20 @@ func withSampleFiles1(t *testing.T, testLogic func(th testHelper), files ...M) {
 	})
 }
 
+func cleanStorage(t *testing.T) {
+	err := s.CleanStorage()
+	if err != nil {
+		t.Error(err)
+	}
+}
+
 func withTestHelper(t *testing.T, testLogic func(th testHelper)) {
 	ts := httptest.NewServer(setupServer())
 	defer ts.Close()
 	th := testHelper{t, ts, nil}
 
-	defer func() {
-		err := s.CleanStorage()
-		if err != nil {
-			t.Error(err)
-		}
-	}()
+	cleanStorage(t)
+	defer cleanStorage(t)
 
 	testLogic(th)
 }

@@ -23,12 +23,12 @@ func (m *memoryStorage) CleanStorage() error {
 }
 
 // @returns storage-level file object
-func (m *memoryStorage) AddFile(request FileData) (StoredFile, error) {
+func (m *memoryStorage) AddFile(fileData FileData) (StoredFile, error) {
 	var f StoredFile
-	f.Name = request.Name
-	f.Size = request.Size
+	f.Name = fileData.Name
+	f.Size = fileData.Size
 	f.Tags = map[string]bool{}
-	for _, tag := range request.Tags {
+	for _, tag := range fileData.Tags {
 		f.Tags[tag] = true
 	}
 	f.Url = "https://S3/todo"

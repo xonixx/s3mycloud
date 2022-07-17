@@ -1,7 +1,7 @@
 package storage
 
 type Storage interface {
-	AddFile(request FileData) (StoredFile, error)
+	AddFile(fileData FileData) (StoredFile, error)
 	ListFiles(listQuery ListFilesQuery) (ListFilesResult, error)
 	RemoveFile(id string) error
 	AssignTags(id string, tags []string) error

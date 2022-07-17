@@ -120,6 +120,7 @@ func removeTagsHandler(c *gin.Context) {
 }
 
 func main() {
+	addMockData()
 	err := setupServer().Run("localhost:8080")
 	if err != nil {
 		panic(err)
@@ -136,4 +137,14 @@ func setupServer() *gin.Engine {
 	router.POST("/api/file/:id/tags", assignTagsHandler)
 	router.DELETE("/api/file/:id/tags", removeTagsHandler)
 	return router
+}
+
+func addMockData() {
+	for i := 0; i < 2; i++ {
+		s.AddFile(storage.FileData{Name: "Report for boss.xlsx", Size: 50000 /*date: "15 Mar 2016",*/, Tags: []string{"document", "work"}})
+		s.AddFile(storage.FileData{Name: "Sing Now.mp3", Size: 2_500_000 /*date: "17 Apr 2019",*/, Tags: []string{"music", "pop"}})
+		s.AddFile(storage.FileData{Name: "Test.txt", Size: 100 /*date: "1 Jan 2008",*/, Tags: []string{}})
+		s.AddFile(storage.FileData{Name: "CV (John Doe).pdf", Size: 123_456 /*date: "9 Mar 2020",*/, Tags: []string{"work"}})
+		s.AddFile(storage.FileData{Name: "Some veeeeeeery loooooooooooong naaaaaaaaame.ext", Size: 0 /*date: "31 Jan 2010",*/, Tags: []string{"test"}})
+	}
 }
