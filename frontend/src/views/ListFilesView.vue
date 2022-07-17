@@ -18,7 +18,7 @@ const searchResults = ref([])
 
 onMounted(async () => {
   const response = await axios.get("http://127.0.0.1:8080/api/file");
-  searchResults.value = response.data;
+  searchResults.value = response.data.page; // TODO date
 })
 /**
  * Format bytes as human-readable text.
