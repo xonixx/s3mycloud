@@ -29,7 +29,7 @@ func uploadMetadataHandler(c *gin.Context) {
 		Name:    newFileRequest.Name,
 		Size:    *newFileRequest.Size,
 		Tags:    newFileRequest.Tags,
-		Created: time.Now().UnixNano(),
+		Created: time.Now().UnixMilli(),
 	})
 	if err != nil {
 		fmt.Println("err:", err)
@@ -165,7 +165,7 @@ func date(dateS string) int64 {
 	if err != nil {
 		panic(err)
 	}
-	return d.UnixNano()
+	return d.UnixMilli()
 }
 func addMockData() {
 	for i := 0; i < 2; i++ {

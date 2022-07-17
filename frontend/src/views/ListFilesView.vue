@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import Pagination from "@/components/Pagination.vue";
 
+import moment from 'moment';
 import {onMounted, ref} from "vue";
 import axios from "axios";
 
@@ -18,7 +19,7 @@ const searchResults = ref([])
 
 onMounted(async () => {
   const response = await axios.get("http://127.0.0.1:8080/api/file");
-  searchResults.value = response.data.page; // TODO date
+  searchResults.value = response.data.page.map((e) => ({...e, date:moment(e.uploaded).format("D MMM YYYY")}));
 })
 /**
  * Format bytes as human-readable text.
