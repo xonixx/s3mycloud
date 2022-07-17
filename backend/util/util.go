@@ -56,3 +56,12 @@ func ParseJsonTyped(input io.ReadCloser, v interface{}) {
 		log.Fatalf("Not a JSON, got %v", err)
 	}
 }
+
+// TODO is there an official generified lib?
+func Map[T any, R any](slice []T, f func(T) R) []R {
+	res := make([]R, 0, len(slice))
+	for _, t := range slice {
+		res = append(res, f(t))
+	}
+	return res
+}

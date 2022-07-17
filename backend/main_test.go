@@ -207,7 +207,7 @@ func withTestHelper(t *testing.T, testLogic func(th testHelper)) {
 
 	err := s.CleanStorage()
 	if err != nil {
-		panic(err)
+		t.Error(err)
 	}
 
 	testLogic(th)
@@ -241,7 +241,10 @@ func (th testHelper) nonExistingId() string {
 }
 
 func TestUploadFileSuccess(t *testing.T) {
-	s.CleanStorage()
+	err := s.CleanStorage()
+	if err != nil {
+		t.Error(err)
+	}
 	ts := httptest.NewServer(setupServer())
 	defer ts.Close()
 	th := testHelper{t, ts, nil}

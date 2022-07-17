@@ -3,6 +3,7 @@ package main
 import (
 	"net/http"
 	"s3mycloud/storage"
+	. "s3mycloud/util"
 	"strings"
 
 	"github.com/gin-gonic/gin"
@@ -67,7 +68,19 @@ func listFilesHandler(c *gin.Context) {
 	if err != nil {
 		c.IndentedJSON(http.StatusInternalServerError, err)
 	} else {
-		c.IndentedJSON(http.StatusOK, files)
+		c.IndentedJSON(http.StatusOK, listFilesResponse{
+			Page: Map(files.Page, func(f storage.StoredFile) listFileRecord {
+				return listFileRecord{
+					Id:       f.Id,
+					Name:     f.Name,
+					Size:     f.Size,
+					Tags:     f.GetTags(),
+					Url:      f.Url,
+					Uploaded: f.Created,
+				}
+			}),
+			Total: files.Total,
+		})
 	}
 }
 
@@ -107,7 +120,10 @@ func removeTagsHandler(c *gin.Context) {
 }
 
 func main() {
-	setupServer().Run("localhost:8080")
+	err := setupServer().Run("localhost:8080")
+	if err != nil {
+		panic(err)
+	}
 }
 
 func setupServer() *gin.Engine {
