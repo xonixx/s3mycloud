@@ -1,11 +1,12 @@
 <script setup lang="ts">
 import Pagination from "@/components/Pagination.vue";
 
-import {ref} from "vue";
+import {onMounted, ref} from "vue";
+import axios from "axios";
 
 const searchResults = ref([])
 
-for (let i = 0; i < 2; i++) {
+/*for (let i = 0; i < 2; i++) {
   searchResults.value.push(
       {name: "Report for boss.xlsx", size: 50000, date: "15 Mar 2016", tags: ["document", "work"]},
       {name: "Sing Now.mp3", size: 2_500_000, date: "17 Apr 2019", tags: ["music", "pop"]},
@@ -13,8 +14,12 @@ for (let i = 0; i < 2; i++) {
       {name: "CV (John Doe).pdf", size: 123_456, date: "9 Mar 2020", tags: ["work"]},
       {name: "Some veeeeeeery loooooooooooong naaaaaaaaame.ext", size: 0, date: "31 Jan 2010", tags: ["test"]},
   )
-}
+}*/
 
+onMounted(async () => {
+  const response = await axios.get("http://127.0.0.1:8080/api/file");
+  searchResults.value = response.data;
+})
 /**
  * Format bytes as human-readable text.
  *
