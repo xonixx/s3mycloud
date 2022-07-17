@@ -10,9 +10,10 @@ type Storage interface {
 }
 
 type FileData struct {
-	Name string
-	Size uint
-	Tags []string
+	Name    string
+	Size    uint
+	Tags    []string
+	Created int64
 }
 
 type StoredFile struct {

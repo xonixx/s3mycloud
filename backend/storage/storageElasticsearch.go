@@ -8,7 +8,6 @@ import (
 	"log"
 	. "s3mycloud/util"
 	"strings"
-	"time"
 )
 
 const INDEX = "file"
@@ -104,7 +103,10 @@ func (s *storageElasticsearch) AddFile(fileData FileData) (StoredFile, error) {
 	f.Url = "https://S3/todo"
 
 	//f.Id = strconv.FormatUint(s.globalId, 10)
-	f.Created = time.Now().UnixNano()
+	if fileData.Created == 0 {
+		return f, errors.New("created should be set")
+	}
+	f.Created = fileData.Created
 
 	indexResp, err := s.esClient.Index(INDEX, ToJson(toEsFileSource(f)),
 		s.esClient.Index.WithRefresh("true"))

@@ -1,10 +1,12 @@
 package main
 
 import (
+	"fmt"
 	"net/http"
 	"s3mycloud/storage"
 	. "s3mycloud/util"
 	"strings"
+	"time"
 
 	"github.com/gin-gonic/gin"
 )
@@ -12,8 +14,8 @@ import (
 var s = createStorage()
 
 func createStorage() storage.Storage {
-	//return storage.NewMemStorage()
-	return storage.NewElasticsearchStorage()
+	return storage.NewMemStorage()
+	//return storage.NewElasticsearchStorage()
 }
 
 func uploadMetadataHandler(c *gin.Context) {
@@ -24,12 +26,15 @@ func uploadMetadataHandler(c *gin.Context) {
 	}
 
 	f, err := s.AddFile(storage.FileData{
-		Name: newFileRequest.Name,
-		Size: *newFileRequest.Size,
-		Tags: newFileRequest.Tags,
+		Name:    newFileRequest.Name,
+		Size:    *newFileRequest.Size,
+		Tags:    newFileRequest.Tags,
+		Created: time.Now().UnixNano(),
 	})
 	if err != nil {
+		fmt.Println("err:", err)
 		c.IndentedJSON(http.StatusInternalServerError, err)
+		return
 	}
 
 	var response uploadMetadataResponse
@@ -139,12 +144,19 @@ func setupServer() *gin.Engine {
 	return router
 }
 
+func date(dateS string) int64 {
+	d, err := time.Parse("2 Jan 2006", dateS)
+	if err != nil {
+		panic(err)
+	}
+	return d.UnixNano()
+}
 func addMockData() {
 	for i := 0; i < 2; i++ {
-		s.AddFile(storage.FileData{Name: "Report for boss.xlsx", Size: 50000 /*date: "15 Mar 2016",*/, Tags: []string{"document", "work"}})
-		s.AddFile(storage.FileData{Name: "Sing Now.mp3", Size: 2_500_000 /*date: "17 Apr 2019",*/, Tags: []string{"music", "pop"}})
-		s.AddFile(storage.FileData{Name: "Test.txt", Size: 100 /*date: "1 Jan 2008",*/, Tags: []string{}})
-		s.AddFile(storage.FileData{Name: "CV (John Doe).pdf", Size: 123_456 /*date: "9 Mar 2020",*/, Tags: []string{"work"}})
-		s.AddFile(storage.FileData{Name: "Some veeeeeeery loooooooooooong naaaaaaaaame.ext", Size: 0 /*date: "31 Jan 2010",*/, Tags: []string{"test"}})
+		s.AddFile(storage.FileData{Name: "Report for boss.xlsx", Size: 50000, Created: date("15 Mar 2016"), Tags: []string{"document", "work"}})
+		s.AddFile(storage.FileData{Name: "Sing Now.mp3", Size: 2_500_000, Created: date("17 Apr 2019"), Tags: []string{"music", "pop"}})
+		s.AddFile(storage.FileData{Name: "Test.txt", Size: 100, Created: date("1 Jan 2008"), Tags: []string{}})
+		s.AddFile(storage.FileData{Name: "CV (John Doe).pdf", Size: 123_456, Created: date("9 Mar 2020"), Tags: []string{"work"}})
+		s.AddFile(storage.FileData{Name: "Some veeeeeeery loooooooooooong naaaaaaaaame.ext", Size: 0, Created: date("31 Jan 2010"), Tags: []string{"test"}})
 	}
 }

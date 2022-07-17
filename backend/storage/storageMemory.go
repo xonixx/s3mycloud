@@ -5,7 +5,6 @@ import (
 	"sort"
 	"strconv"
 	"strings"
-	"time"
 )
 
 type memoryStorage struct {
@@ -35,7 +34,11 @@ func (m *memoryStorage) AddFile(fileData FileData) (StoredFile, error) {
 
 	m.globalId += 1
 	f.Id = strconv.FormatUint(m.globalId, 10)
-	f.Created = time.Now().UnixNano()
+
+	if fileData.Created == 0 {
+		return f, errors.New("created should be set")
+	}
+	f.Created = fileData.Created
 
 	m.filesMemStorage = append(m.filesMemStorage, f)
 
