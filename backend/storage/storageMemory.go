@@ -1,4 +1,4 @@
-package main
+package storage
 
 import (
 	"errors"
@@ -9,7 +9,7 @@ import (
 )
 
 type memoryStorage struct {
-	filesMemStorage []file
+	filesMemStorage []StoredFile
 	globalId        uint64
 }
 
@@ -17,16 +17,16 @@ func NewMemStorage() Storage {
 	return &memoryStorage{}
 }
 
-func (m *memoryStorage) cleanStorage() error {
+func (m *memoryStorage) CleanStorage() error {
 	m.filesMemStorage = nil
 	return nil
 }
 
 // @returns storage-level file object
-func (m *memoryStorage) addFile(request uploadMetadataRequest) (file, error) {
-	var f file
+func (m *memoryStorage) AddFile(request FileData) (StoredFile, error) {
+	var f StoredFile
 	f.Name = request.Name
-	f.Size = *request.Size
+	f.Size = request.Size
 	f.Tags = map[string]bool{}
 	for _, tag := range request.Tags {
 		f.Tags[tag] = true
@@ -42,17 +42,17 @@ func (m *memoryStorage) addFile(request uploadMetadataRequest) (file, error) {
 	return f, nil
 }
 
-func (m *memoryStorage) findFile(id string) (int, file) {
+func (m *memoryStorage) findFile(id string) (int, StoredFile) {
 	for i, f := range m.filesMemStorage {
 		if id == f.Id {
 			return i, f
 		}
 	}
-	return -1, file{}
+	return -1, StoredFile{}
 }
 
-func (m *memoryStorage) listFiles(listQuery listFilesQueryRequest) (listFilesResponse, error) {
-	var matched []file
+func (m *memoryStorage) ListFiles(listQuery ListFilesQuery) (ListFilesResult, error) {
+	var matched []StoredFile
 	for _, f := range m.filesMemStorage {
 		var matchedName, matchedTags bool
 		matchedName = true
@@ -73,7 +73,7 @@ func (m *memoryStorage) listFiles(listQuery listFilesQueryRequest) (listFilesRes
 		}
 	}
 	total := len(matched)
-	var page = make([]listFileRecord, 0)
+	var page = make([]StoredFile, 0)
 	var from, to int
 	from = int(listQuery.Page * listQuery.PageSize)
 	to = from + int(listQuery.PageSize)
@@ -102,16 +102,16 @@ func (m *memoryStorage) listFiles(listQuery listFilesQueryRequest) (listFilesRes
 	}
 	if from <= total {
 		for _, f := range matched[from:to] {
-			page = append(page, listFileRecordOf(f))
+			page = append(page, f)
 		}
 	}
-	return listFilesResponse{
+	return ListFilesResult{
 		Page:  page,
 		Total: uint(total),
 	}, nil
 }
 
-func (m *memoryStorage) removeFile(id string) error {
+func (m *memoryStorage) RemoveFile(id string) error {
 	if i, _ := m.findFile(id); i >= 0 {
 		m.filesMemStorage = append(m.filesMemStorage[:i], m.filesMemStorage[i+1:]...)
 		return nil
@@ -120,7 +120,7 @@ func (m *memoryStorage) removeFile(id string) error {
 	}
 }
 
-func (m *memoryStorage) assignTags(id string, tags []string) error {
+func (m *memoryStorage) AssignTags(id string, tags []string) error {
 	if i, f := m.findFile(id); i >= 0 {
 		for _, t := range tags {
 			f.Tags[t] = true
@@ -131,7 +131,7 @@ func (m *memoryStorage) assignTags(id string, tags []string) error {
 	}
 }
 
-func (m *memoryStorage) removeTags(id string, tags []string) error {
+func (m *memoryStorage) RemoveTags(id string, tags []string) error {
 	if i, f := m.findFile(id); i >= 0 {
 		for _, t := range tags {
 			if !f.Tags[t] {

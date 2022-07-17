@@ -2,6 +2,7 @@ package main
 
 import (
 	"net/http"
+	"s3mycloud/storage"
 	"strings"
 
 	"github.com/gin-gonic/gin"
@@ -9,9 +10,9 @@ import (
 
 var s = createStorage()
 
-func createStorage() Storage {
-	//return NewMemStorage()
-	return NewElasticsearchStorage()
+func createStorage() storage.Storage {
+	return storage.NewMemStorage()
+	//return storage.NewElasticsearchStorage()
 }
 
 func uploadMetadataHandler(c *gin.Context) {
@@ -21,7 +22,11 @@ func uploadMetadataHandler(c *gin.Context) {
 		return
 	}
 
-	f, err := s.addFile(newFileRequest)
+	f, err := s.AddFile(storage.FileData{
+		Name: newFileRequest.Name,
+		Size: *newFileRequest.Size,
+		Tags: newFileRequest.Tags,
+	})
 	if err != nil {
 		c.IndentedJSON(http.StatusInternalServerError, err)
 	}
@@ -52,7 +57,13 @@ func listFilesHandler(c *gin.Context) {
 		listQuery.Tags = strings.Split(listQuery.Tags[0], ",")
 	}
 	//fmt.Println("listQuery:", listQuery)
-	files, err := s.listFiles(listQuery)
+	files, err := s.ListFiles(storage.ListFilesQuery{
+		Name:     listQuery.Name,
+		Page:     listQuery.Page,
+		PageSize: listQuery.PageSize,
+		Tags:     listQuery.Tags,
+		Sort:     listQuery.Sort,
+	})
 	if err != nil {
 		c.IndentedJSON(http.StatusInternalServerError, err)
 	} else {
@@ -62,7 +73,7 @@ func listFilesHandler(c *gin.Context) {
 
 func deleteFileHandler(c *gin.Context) {
 	id := c.Param("id")
-	if e := s.removeFile(id); e != nil {
+	if e := s.RemoveFile(id); e != nil {
 		c.IndentedJSON(http.StatusNotFound, errorResponseOf(e))
 		return
 	}
@@ -75,7 +86,7 @@ func assignTagsHandler(c *gin.Context) {
 		return
 	}
 	id := c.Param("id")
-	if err := s.assignTags(id, tags); err != nil {
+	if err := s.AssignTags(id, tags); err != nil {
 		c.IndentedJSON(http.StatusNotFound, errorResponseOf(err))
 		return
 	}
@@ -88,7 +99,7 @@ func removeTagsHandler(c *gin.Context) {
 		return
 	}
 	id := c.Param("id")
-	if err := s.removeTags(id, tags); err != nil {
+	if err := s.RemoveTags(id, tags); err != nil {
 		c.IndentedJSON(http.StatusNotFound, errorResponseOf(err))
 		return
 	}

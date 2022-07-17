@@ -10,6 +10,7 @@ import (
 	"net/http/httptest"
 	"reflect"
 	"runtime/debug"
+	. "s3mycloud/util"
 	"sort"
 	"strconv"
 	"testing"
@@ -106,7 +107,7 @@ func (th testHelper) getExpectStatus(path string, expectedStatus int) M {
 func (th testHelper) deleteExpectStatus(path string, bodyJson interface{}, expectedStatus int) M {
 	var body io.Reader
 	if bodyJson != nil {
-		body = toJson(bodyJson)
+		body = ToJson(bodyJson)
 	}
 	if req, err := http.NewRequest("DELETE", fmt.Sprintf("%s/%s", th.ts.URL, path), body); err != nil {
 		th.t.FailNow()
@@ -121,7 +122,7 @@ func (th testHelper) deleteExpectStatus(path string, bodyJson interface{}, expec
 	return nil
 }
 func (th testHelper) postExpectStatus(path string, bodyJson interface{}, expectedStatus int) M {
-	if resp, err := http.Post(fmt.Sprintf("%s/%s", th.ts.URL, path), "application/json", toJson(bodyJson)); err != nil {
+	if resp, err := http.Post(fmt.Sprintf("%s/%s", th.ts.URL, path), "application/json", ToJson(bodyJson)); err != nil {
 		th.t.FailNow()
 	} else {
 		th.assertEquals(expectedStatus, resp.StatusCode)
@@ -204,7 +205,10 @@ func withTestHelper(t *testing.T, testLogic func(th testHelper)) {
 	defer ts.Close()
 	th := testHelper{t, ts, nil}
 
-	s.cleanStorage()
+	err := s.CleanStorage()
+	if err != nil {
+		panic(err)
+	}
 
 	testLogic(th)
 }
@@ -215,7 +219,7 @@ const nonExistingTag = "tagDoesNotExist"
 func (th *testHelper) setupFiles(files []M) {
 	th.fileJsons = nil
 	for _, f := range files {
-		resp, err := http.Post(fmt.Sprintf("%s/api/file/upload", th.ts.URL), "application/json", toJson(f))
+		resp, err := http.Post(fmt.Sprintf("%s/api/file/upload", th.ts.URL), "application/json", ToJson(f))
 
 		//fmt.Println("resp JSON:", readJsonAsMap(t, resp))
 
@@ -237,12 +241,12 @@ func (th testHelper) nonExistingId() string {
 }
 
 func TestUploadFileSuccess(t *testing.T) {
-	s.cleanStorage()
+	s.CleanStorage()
 	ts := httptest.NewServer(setupServer())
 	defer ts.Close()
 	th := testHelper{t, ts, nil}
 
-	resp, err := http.Post(fmt.Sprintf("%s/api/file/upload", ts.URL), "application/json", toJson(M{
+	resp, err := http.Post(fmt.Sprintf("%s/api/file/upload", ts.URL), "application/json", ToJson(M{
 		"name": "file.txt",
 		"size": 100,
 		"tags": []string{"text", "document"},

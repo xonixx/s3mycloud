@@ -1,5 +1,7 @@
 package main
 
+import "s3mycloud/storage"
+
 type uploadMetadataRequest struct {
 	Name string   `json:"name" binding:"required"`
 	Size *uint    `json:"size" binding:"required"` // using pointer to distinguish size=0 from omitted
@@ -44,13 +46,13 @@ type listFilesResponse struct {
 
 type listOfTags []string
 
-func listFileRecordOf(f file) listFileRecord {
+func listFileRecordOf(f storage.StoredFile) listFileRecord {
 	return listFileRecord{
 		Id:       f.Id,
 		Name:     f.Name,
 		Size:     f.Size,
 		Url:      f.Url,
-		Tags:     f.tags(),
+		Tags:     f.GetTags(),
 		Uploaded: f.Created,
 	}
 }

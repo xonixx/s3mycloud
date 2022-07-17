@@ -1,4 +1,4 @@
-package main
+package util
 
 import (
 	"bytes"
@@ -10,7 +10,7 @@ import (
 
 type M map[string]interface{}
 
-func toJson(v interface{}) io.Reader {
+func ToJson(v interface{}) io.Reader {
 	if bytesData, err := json.Marshal(v); err == nil {
 		return bytes.NewReader(bytesData)
 	} else {
@@ -18,15 +18,15 @@ func toJson(v interface{}) io.Reader {
 	}
 }
 
-func stringKeys(v map[string]bool) []string {
+/*func StringKeys(v map[string]bool) []string {
 	res := make([]string, 0)
 	for k := range v {
 		res = append(res, k)
 	}
 	return res
-}
+}*/
 
-func parseJson(input io.ReadCloser) map[string]interface{} {
+/*func parseJson(input io.ReadCloser) map[string]interface{} {
 	var body map[string]interface{}
 	defer input.Close()
 	if data, err := ioutil.ReadAll(input); err != nil {
@@ -46,9 +46,9 @@ func parseJsonEsFile(input io.ReadCloser) esFile {
 		log.Fatalf("Not a JSON, got %v", err)
 	}
 	return body
-}
+}*/
 
-func parseJsonTyped(input io.ReadCloser, v interface{}) {
+func ParseJsonTyped(input io.ReadCloser, v interface{}) {
 	defer input.Close()
 	if data, err := ioutil.ReadAll(input); err != nil {
 		log.Fatalf("expected error to be nil got %v", err)
