@@ -205,10 +205,12 @@ func withTestHelper(t *testing.T, testLogic func(th testHelper)) {
 	defer ts.Close()
 	th := testHelper{t, ts, nil}
 
-	err := s.CleanStorage()
-	if err != nil {
-		t.Error(err)
-	}
+	defer func() {
+		err := s.CleanStorage()
+		if err != nil {
+			t.Error(err)
+		}
+	}()
 
 	testLogic(th)
 }
@@ -241,36 +243,29 @@ func (th testHelper) nonExistingId() string {
 }
 
 func TestUploadFileSuccess(t *testing.T) {
-	err := s.CleanStorage()
-	if err != nil {
-		t.Error(err)
-	}
-	ts := httptest.NewServer(setupServer())
-	defer ts.Close()
-	th := testHelper{t, ts, nil}
+	withTestHelper(t, func(th testHelper) {
+		resp, err := http.Post(fmt.Sprintf("%s/api/file/upload", th.ts.URL), "application/json", ToJson(M{
+			"name": "file.txt",
+			"size": 100,
+			"tags": []string{"text", "document"},
+		}))
 
-	resp, err := http.Post(fmt.Sprintf("%s/api/file/upload", ts.URL), "application/json", ToJson(M{
-		"name": "file.txt",
-		"size": 100,
-		"tags": []string{"text", "document"},
-	}))
+		//fmt.Println("resp JSON:", readJsonAsMap(t, resp))
 
-	//fmt.Println("resp JSON:", readJsonAsMap(t, resp))
+		respJson := checkAndReadRespJson(t, resp, err, http.StatusCreated)
 
-	respJson := checkAndReadRespJson(t, resp, err, http.StatusCreated)
+		id := getJsonField(t, respJson, "id").(string)
+		//fmt.Println(id)
+		getJsonField(t, respJson, "uploadUrl")
 
-	id := getJsonField(t, respJson, "id").(string)
-	//fmt.Println(id)
-	getJsonField(t, respJson, "uploadUrl")
+		resp, err = http.Get(fmt.Sprintf("%s/api/file", th.ts.URL))
+		respJson = checkAndReadRespJson(t, resp, err, http.StatusOK)
+		log.Println("respJson", respJson)
+		th.assertEqualsJsonPath(respJson, 1, "total")
 
-	resp, err = http.Get(fmt.Sprintf("%s/api/file", ts.URL))
-	respJson = checkAndReadRespJson(t, resp, err, http.StatusOK)
-	log.Println("respJson", respJson)
-	th.assertEqualsJsonPath(respJson, 1, "total")
-
-	th.assertEqualsJsonPath(respJson, "file.txt", "page", "0", "name")
-	th.assertEqualsJsonPath(respJson, id, "page", "0", "id")
-
+		th.assertEqualsJsonPath(respJson, "file.txt", "page", "0", "name")
+		th.assertEqualsJsonPath(respJson, id, "page", "0", "id")
+	})
 }
 
 func TestListAllDefaults(t *testing.T) {
