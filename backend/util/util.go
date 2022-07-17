@@ -26,28 +26,6 @@ func ToJson(v interface{}) io.Reader {
 	return res
 }*/
 
-/*func parseJson(input io.ReadCloser) map[string]interface{} {
-	var body map[string]interface{}
-	defer input.Close()
-	if data, err := ioutil.ReadAll(input); err != nil {
-		log.Fatalf("expected error to be nil got %v", err)
-	} else if err := json.Unmarshal(data, &body); err != nil {
-		log.Fatalf("Not a JSON, got %v", err)
-	}
-	return body
-}
-
-func parseJsonEsFile(input io.ReadCloser) esFile {
-	var body esFile
-	defer input.Close()
-	if data, err := ioutil.ReadAll(input); err != nil {
-		log.Fatalf("expected error to be nil got %v", err)
-	} else if err := json.Unmarshal(data, &body); err != nil {
-		log.Fatalf("Not a JSON, got %v", err)
-	}
-	return body
-}*/
-
 func ParseJsonTyped(input io.ReadCloser, v interface{}) {
 	defer input.Close()
 	if data, err := ioutil.ReadAll(input); err != nil {
