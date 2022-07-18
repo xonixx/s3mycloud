@@ -27,6 +27,7 @@ jobs:
 
       - name: Build and Test
         run: |
+          cd backend
           go test -race ./...
 
 #  build-windows:
