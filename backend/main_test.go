@@ -14,6 +14,7 @@ import (
 	"sort"
 	"strconv"
 	"testing"
+	"time"
 )
 
 func toStringList(list []interface{}) []string {
@@ -225,7 +226,7 @@ func (th *testHelper) setupFiles(files []M) {
 	th.fileJsons = nil
 	for _, f := range files {
 		resp, err := http.Post(fmt.Sprintf("%s/api/file/upload", th.ts.URL), "application/json", ToJson(f))
-
+		time.Sleep(time.Millisecond) // we have millis resolution in file timestamps, so let's wait here to make default order (by uploaded) deterministic
 		//fmt.Println("resp JSON:", readJsonAsMap(t, resp))
 
 		respJson := checkAndReadRespJson(th.t, resp, err, http.StatusCreated)
@@ -274,6 +275,7 @@ func TestUploadFileSuccess(t *testing.T) {
 func TestListAllDefaults(t *testing.T) {
 	withSampleFiles(t, func(th testHelper) {
 		respJson := th.getExpectStatus("api/file", http.StatusOK)
+		log.Println("respJson", respJson)
 
 		th.assertEqualsJsonPath(respJson, 5, "total")
 
