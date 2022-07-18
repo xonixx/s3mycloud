@@ -125,8 +125,13 @@ func removeTagsHandler(c *gin.Context) {
 }
 
 func main() {
+	config, err := LoadConfig("../application-external.yml")
+	if err != nil {
+		panic(err)
+	}
+	fmt.Println(config.S3.Bucket)
 	addMockData()
-	err := setupServer().Run("localhost:8080")
+	err = setupServer().Run("localhost:8080")
 	if err != nil {
 		panic(err)
 	}
