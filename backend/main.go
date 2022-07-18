@@ -130,6 +130,7 @@ func main() {
 		panic(err)
 	}
 	fmt.Println(config.S3.Bucket)
+	listS3(*config)
 	addMockData()
 	err = setupServer().Run("localhost:8080")
 	if err != nil {
