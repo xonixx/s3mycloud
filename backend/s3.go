@@ -12,6 +12,11 @@ import (
 func listS3(conf Config) {
 	// Load the Shared AWS Configuration (~/.aws/config)
 	cfg, err := config.LoadDefaultConfig(context.TODO(),
+		config.WithRegion(conf.S3.Region),
+		config.WithEndpointResolverWithOptions(aws.EndpointResolverWithOptionsFunc(
+			func(service, region string, options ...interface{}) (aws.Endpoint, error) {
+				return aws.Endpoint{URL: conf.S3.Endpoint}, nil
+			})),
 		config.WithCredentialsProvider(credentials.NewStaticCredentialsProvider(conf.S3.AccessKey, conf.S3.SecretKey, "")))
 	if err != nil {
 		log.Fatal(err)

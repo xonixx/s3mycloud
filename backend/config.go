@@ -10,6 +10,8 @@ type Config struct {
 		Bucket    string `yaml:"bucket"`
 		AccessKey string `yaml:"accessKey"`
 		SecretKey string `yaml:"secretKey"`
+		Endpoint  string `yaml:"endpoint"`
+		Region    string `yaml:"region"`
 	} `yaml:"s3"`
 }
 
