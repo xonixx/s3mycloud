@@ -25,11 +25,12 @@ func uploadMetadataHandler(c *gin.Context) {
 		return
 	}
 
+	now := time.Now()
 	f, err := s.AddFile(storage.FileData{
 		Name:    newFileRequest.Name,
 		Size:    *newFileRequest.Size,
 		Tags:    newFileRequest.Tags,
-		Created: time.Now().UnixMilli(),
+		Created: &now,
 	})
 	if err != nil {
 		fmt.Println("err:", err)
@@ -125,14 +126,13 @@ func removeTagsHandler(c *gin.Context) {
 }
 
 func main() {
-	config, err := LoadConfig("../application-external.yml")
-	if err != nil {
-		panic(err)
+	{
+		err := addMockData()
+		if err != nil {
+			panic(err)
+		}
 	}
-	fmt.Println(config.S3.Bucket)
-	listS3(*config)
-	addMockData()
-	err = setupServer().Run("localhost:8080")
+	err := setupServer().Run("localhost:8080")
 	if err != nil {
 		panic(err)
 	}
@@ -173,7 +173,26 @@ func date(dateS string) int64 {
 	}
 	return d.UnixMilli()
 }
-func addMockData() {
+func addMockData() error {
+	config, err := LoadConfig("../application-external.yml")
+	if err != nil {
+		panic(err)
+	}
+	fmt.Println(config.S3.Bucket)
+	s3Files, err := listS3(*config)
+	if err != nil {
+		return err
+	}
+	for _, f := range s3Files {
+		_, err := s.AddFile(storage.FileData{Name: f.Name(), Size: uint(f.Size), Created: &f.LastModified, Tags: []string{f.Path()}})
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+/*func addMockData() {
 	for i := 0; i < 2; i++ {
 		s.AddFile(storage.FileData{Name: "Report for boss.xlsx", Size: 50000, Created: date("15 Mar 2016"), Tags: []string{"document", "work"}})
 		s.AddFile(storage.FileData{Name: "Sing Now.mp3", Size: 2_500_000, Created: date("17 Apr 2019"), Tags: []string{"music", "pop"}})
@@ -181,4 +200,4 @@ func addMockData() {
 		s.AddFile(storage.FileData{Name: "CV (John Doe).pdf", Size: 123_456, Created: date("9 Mar 2020"), Tags: []string{"work"}})
 		s.AddFile(storage.FileData{Name: "Some veeeeeeery loooooooooooong naaaaaaaaame.ext", Size: 0, Created: date("31 Jan 2010"), Tags: []string{"test"}})
 	}
-}
+}*/

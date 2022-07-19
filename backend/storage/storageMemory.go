@@ -35,10 +35,10 @@ func (m *memoryStorage) AddFile(fileData FileData) (StoredFile, error) {
 	m.globalId += 1
 	f.Id = strconv.FormatUint(m.globalId, 10)
 
-	if fileData.Created == 0 {
+	if fileData.Created == nil {
 		return f, errors.New("created should be set")
 	}
-	f.Created = fileData.Created
+	f.Created = fileData.Created.UnixMilli()
 
 	m.filesMemStorage = append(m.filesMemStorage, f)
 

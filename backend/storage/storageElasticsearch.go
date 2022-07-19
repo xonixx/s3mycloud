@@ -103,10 +103,10 @@ func (s *storageElasticsearch) AddFile(fileData FileData) (StoredFile, error) {
 	f.Url = "https://S3/todo"
 
 	//f.Id = strconv.FormatUint(s.globalId, 10)
-	if fileData.Created == 0 {
+	if fileData.Created == nil {
 		return f, errors.New("created should be set")
 	}
-	f.Created = fileData.Created
+	f.Created = fileData.Created.UnixMilli()
 
 	indexResp, err := s.esClient.Index(INDEX, ToJson(toEsFileSource(f)),
 		s.esClient.Index.WithRefresh("true"))

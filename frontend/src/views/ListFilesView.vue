@@ -18,7 +18,7 @@ const searchResults = ref([])
 }*/
 
 onMounted(async () => {
-  const response = await axios.get("http://127.0.0.1:8080/api/file");
+  const response = await axios.get("http://127.0.0.1:8080/api/file?pageSize=500");
   searchResults.value = response.data.page.map((e) => ({...e, date:moment(e.uploaded).format("D MMM YYYY")}));
 })
 /**

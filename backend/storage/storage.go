@@ -1,5 +1,7 @@
 package storage
 
+import "time"
+
 type Storage interface {
 	AddFile(fileData FileData) (StoredFile, error)
 	ListFiles(listQuery ListFilesQuery) (ListFilesResult, error)
@@ -13,7 +15,7 @@ type FileData struct {
 	Name    string
 	Size    uint
 	Tags    []string
-	Created int64
+	Created *time.Time
 }
 
 type StoredFile struct {

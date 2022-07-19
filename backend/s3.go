@@ -6,10 +6,13 @@ import (
 	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/credentials"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
-	"log"
+	"github.com/aws/aws-sdk-go-v2/service/s3/types"
+	"s3mycloud/util"
+	"strings"
+	"time"
 )
 
-func listS3(conf Config) {
+func listS3(conf Config) ([]S3File, error) {
 	// Load the Shared AWS Configuration (~/.aws/config)
 	cfg, err := config.LoadDefaultConfig(context.TODO(),
 		config.WithRegion(conf.S3.Region),
@@ -19,7 +22,8 @@ func listS3(conf Config) {
 			})),
 		config.WithCredentialsProvider(credentials.NewStaticCredentialsProvider(conf.S3.AccessKey, conf.S3.SecretKey, "")))
 	if err != nil {
-		log.Fatal(err)
+		//log.Fatal(err)
+		return nil, err
 	}
 
 	// Create an Amazon S3 service client
@@ -30,11 +34,35 @@ func listS3(conf Config) {
 		Bucket: aws.String(conf.S3.Bucket),
 	})
 	if err != nil {
-		log.Fatal(err)
+		//log.Fatal(err)
+		return nil, err
 	}
 
-	log.Println("first page results:")
-	for _, object := range output.Contents {
-		log.Printf("key=%s size=%d", aws.ToString(object.Key), object.Size)
-	}
+	//log.Println("first page results:")
+	//for _, object := range output.Contents {
+	//	log.Printf("key=%s size=%d", aws.ToString(object.Key), object.Size)
+	//}
+	return util.Map(output.Contents, func(o types.Object) S3File {
+		return S3File{
+			Key:          *o.Key,
+			Size:         o.Size,
+			LastModified: *o.LastModified,
+		}
+	}), nil
+}
+
+type S3File struct {
+	Key          string
+	Size         int64
+	LastModified time.Time
+}
+
+func (s3f S3File) Path() string {
+	parts := strings.Split(s3f.Key, "/")
+	pathParts := parts[:len(parts)-1]
+	return strings.Join(pathParts, "/")
+}
+func (s3f S3File) Name() string {
+	parts := strings.Split(s3f.Key, "/")
+	return parts[len(parts)-1]
 }
