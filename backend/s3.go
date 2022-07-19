@@ -67,7 +67,7 @@ func makePreSignedUrl(config Config, key string) (string, error) {
 		Bucket: &config.S3.Bucket,
 		Key:    &key,
 	}
-	r, err := presignClient.PresignGetObject(context.TODO(), input)
+	r, err := presignClient.PresignGetObject(context.TODO(), input, s3.WithPresignExpires(30*time.Minute))
 	if err != nil {
 		return "", err
 	}
