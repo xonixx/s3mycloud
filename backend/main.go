@@ -40,7 +40,7 @@ func uploadMetadataHandler(c *gin.Context) {
 
 	var response uploadMetadataResponse
 	response.Id = f.Id
-	response.UploadUrl = f.Url
+	response.UploadUrl = "TODO" // TODO pre-signed URL for upload
 
 	c.IndentedJSON(http.StatusCreated, response)
 }
@@ -177,7 +177,12 @@ func addMockData() error {
 		return err
 	}
 	for _, f := range s3Files {
-		_, err := s.AddFile(storage.FileData{Name: f.Name(), Size: uint(f.Size), Created: &f.LastModified, Tags: []string{f.Path()}})
+		_, err := s.AddFile(storage.FileData{
+			Name:    f.Name(),
+			Size:    uint(f.Size),
+			Created: &f.LastModified,
+			Tags:    []string{f.Path()},
+		})
 		if err != nil {
 			return err
 		}

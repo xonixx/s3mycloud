@@ -30,7 +30,7 @@ func (m *memoryStorage) AddFile(fileData FileData) (StoredFile, error) {
 	for _, tag := range fileData.Tags {
 		f.Tags[tag] = true
 	}
-	f.Url = "https://S3/todo"
+	f.ExternalId = fileData.ExternalId
 
 	m.globalId += 1
 	f.Id = strconv.FormatUint(m.globalId, 10)

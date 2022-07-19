@@ -12,19 +12,20 @@ type Storage interface {
 }
 
 type FileData struct {
-	Name    string
-	Size    uint
-	Tags    []string
-	Created *time.Time
+	Name       string
+	Size       uint
+	Tags       []string
+	Created    *time.Time
+	ExternalId string
 }
 
 type StoredFile struct {
-	Id      string
-	Name    string
-	Size    uint
-	Tags    map[string]bool
-	Url     string // S3 URL todo
-	Created int64
+	Id         string
+	Name       string
+	Size       uint
+	Tags       map[string]bool
+	ExternalId string // S3 object key in case of S3
+	Created    int64
 }
 
 func (f *StoredFile) GetTags() []string {

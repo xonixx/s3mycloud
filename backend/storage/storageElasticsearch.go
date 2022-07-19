@@ -21,11 +21,11 @@ type esFile struct {
 	Source esFileSource `json:"_source"`
 }
 type esFileSource struct {
-	Name    string   `json:"name"`
-	Size    uint     `json:"size"`
-	Tags    []string `json:"tags"`
-	Url     string   `json:"url"` // S3 URL todo
-	Created int64    `json:"created"`
+	Name       string   `json:"name"`
+	Size       uint     `json:"size"`
+	Tags       []string `json:"tags"`
+	ExternalId string   `json:"externalId"`
+	Created    int64    `json:"created"`
 }
 type esSearchResult struct {
 	Took     uint `json:"took"`
@@ -67,23 +67,23 @@ func (s *storageElasticsearch) CleanStorage() error {
 func toEsFileSource(f StoredFile) esFileSource {
 	return esFileSource{
 		//Id:      f.Id,
-		Name:    f.Name,
-		Size:    f.Size,
-		Tags:    f.GetTags(),
-		Url:     f.Url,
-		Created: f.Created,
+		Name:       f.Name,
+		Size:       f.Size,
+		Tags:       f.GetTags(),
+		ExternalId: f.ExternalId,
+		Created:    f.Created,
 	}
 }
 
 func fromEsFile(ef esFile) StoredFile {
 	source := ef.Source
 	f := StoredFile{
-		Id:      ef.Id,
-		Name:    source.Name,
-		Size:    source.Size,
-		Tags:    map[string]bool{},
-		Url:     source.Url,
-		Created: source.Created,
+		Id:         ef.Id,
+		Name:       source.Name,
+		Size:       source.Size,
+		Tags:       map[string]bool{},
+		ExternalId: source.ExternalId,
+		Created:    source.Created,
 	}
 	for _, tag := range source.Tags {
 		f.Tags[tag] = true
@@ -100,7 +100,7 @@ func (s *storageElasticsearch) AddFile(fileData FileData) (StoredFile, error) {
 	for _, tag := range fileData.Tags {
 		f.Tags[tag] = true
 	}
-	f.Url = "https://S3/todo"
+	f.ExternalId = fileData.ExternalId
 
 	//f.Id = strconv.FormatUint(s.globalId, 10)
 	if fileData.Created == nil {

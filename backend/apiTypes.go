@@ -51,7 +51,6 @@ func listFileRecordOf(f storage.StoredFile) listFileRecord {
 		Id:       f.Id,
 		Name:     f.Name,
 		Size:     f.Size,
-		Url:      f.Url,
 		Tags:     f.GetTags(),
 		Uploaded: f.Created,
 	}

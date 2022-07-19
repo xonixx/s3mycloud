@@ -232,7 +232,6 @@ func (th *testHelper) setupFiles(files []M) {
 		respJson := checkAndReadRespJson(th.t, resp, err, http.StatusCreated)
 		th.fileJsons = append(th.fileJsons, respJson)
 		getJsonField(th.t, respJson, "id")
-		getJsonField(th.t, respJson, "uploadUrl")
 	}
 }
 
@@ -260,7 +259,6 @@ func TestUploadFileSuccess(t *testing.T) {
 
 		id := getJsonField(t, respJson, "id").(string)
 		//fmt.Println(id)
-		getJsonField(t, respJson, "uploadUrl")
 
 		resp, err = http.Get(fmt.Sprintf("%s/api/file", th.ts.URL))
 		respJson = checkAndReadRespJson(t, resp, err, http.StatusOK)
