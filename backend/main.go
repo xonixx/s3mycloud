@@ -178,10 +178,11 @@ func addMockData() error {
 	}
 	for _, f := range s3Files {
 		_, err := s.AddFile(storage.FileData{
-			Name:    f.Name(),
-			Size:    uint(f.Size),
-			Created: &f.LastModified,
-			Tags:    []string{f.Path()},
+			Name:       f.Name(),
+			ExternalId: f.Key,
+			Size:       uint(f.Size),
+			Created:    &f.LastModified,
+			Tags:       []string{f.Path()},
 		})
 		if err != nil {
 			return err
