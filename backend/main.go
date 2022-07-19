@@ -76,14 +76,7 @@ func listFilesHandler(c *gin.Context) {
 	} else {
 		c.IndentedJSON(http.StatusOK, listFilesResponse{
 			Page: Map(files.Page, func(f storage.StoredFile) listFileRecord {
-				return listFileRecord{
-					Id:       f.Id,
-					Name:     f.Name,
-					Size:     f.Size,
-					Tags:     f.GetTags(),
-					Url:      f.Url,
-					Uploaded: f.Created,
-				}
+				return listFileRecordOf(f)
 			}),
 			Total: files.Total,
 		})

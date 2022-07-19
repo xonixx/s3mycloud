@@ -43,11 +43,7 @@ func listS3(conf Config) ([]S3File, error) {
 	//	log.Printf("key=%s size=%d", aws.ToString(object.Key), object.Size)
 	//}
 	return util.Map(output.Contents, func(o types.Object) S3File {
-		return S3File{
-			Key:          *o.Key,
-			Size:         o.Size,
-			LastModified: *o.LastModified,
-		}
+		return s3FileOf(o)
 	}), nil
 }
 
@@ -55,6 +51,14 @@ type S3File struct {
 	Key          string
 	Size         int64
 	LastModified time.Time
+}
+
+func s3FileOf(o types.Object) S3File {
+	return S3File{
+		Key:          *o.Key,
+		Size:         o.Size,
+		LastModified: *o.LastModified,
+	}
 }
 
 func (s3f S3File) Path() string {
