@@ -4,6 +4,7 @@ import Pagination from "@/components/Pagination.vue";
 import moment from 'moment';
 import {onMounted, ref} from "vue";
 import axios from "axios";
+import router from "@/router";
 
 const {q, page, pageSize} = withDefaults(defineProps<{
   q: string;
@@ -34,7 +35,8 @@ onMounted(async () => {
 
 function changePage(p: number) {
   console.info("Changing page to ", p)
-  // page = p;
+  router.push({ path: '/', query: { ...router.currentRoute.value.query, page: p } })
+  // location.href = '?page='+p;
 }
 
 /**
