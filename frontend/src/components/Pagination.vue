@@ -1,12 +1,18 @@
 <script setup lang="ts">
+import {ref} from "vue";
+
 defineProps<{
   page: number
   totalPages: number
-  changePage: (p: number) => {}
+  changePage: (p: number) => void
 }>();
+
+const pageRef = ref()
+
 </script>
 
 <template>
+  PR {{ pageRef }}
   <!--  <nav class="pagination" role="navigation" aria-label="pagination">-->
   <!--    <a class="pagination-previous is-disabled">Previous</a>
       <a class="pagination-next">Next page</a>
@@ -48,6 +54,9 @@ defineProps<{
     </div>
     <div class="control" style="margin-right: 0">
       <input class="input is-small" type="text" placeholder=""
+             :value="page+1"
+             @keyup.enter="changePage((parseInt(pageRef.value) || 1)-1)"
+             ref="pageRef"
              style="width: 30px">
     </div>
     <div class="control">

@@ -32,6 +32,11 @@ onMounted(async () => {
   searchResults.value = response.data.page.map((e) => ({...e, date: moment(e.uploaded).format("D MMM YYYY")}));
 })
 
+function changePage(p: number) {
+  console.info("Changing page to ", p)
+  // page = p;
+}
+
 /**
  * Format bytes as human-readable text.
  *
@@ -67,7 +72,7 @@ function humanFileSize(bytes: number, si = false, dp = 1) {
 </script>
 
 <template>
-  PS:{{ pageSize }}
+  PS:{{ pageSize }} P:{{ page }}
   <!--  <main>-->
   <div class="field is-grouped">
     <div class="control is-expanded">
@@ -80,7 +85,7 @@ function humanFileSize(bytes: number, si = false, dp = 1) {
     </div>
   </div>
 
-  <Pagination total-pages="10"/>
+  <Pagination :page="page" :total-pages="100" :change-page="changePage"/>
 
   <div>
     <div v-for="r in searchResults" class="res-item">
@@ -93,7 +98,7 @@ function humanFileSize(bytes: number, si = false, dp = 1) {
     </div>
   </div>
 
-  <Pagination/>
+<!--  <Pagination/>-->
   <!--  </main>-->
 </template>
 
