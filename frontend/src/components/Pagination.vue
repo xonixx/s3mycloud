@@ -47,10 +47,12 @@ defineProps<{
       </a>
     </div>
     <div class="control" style="margin-right: 0">
-      <input class="input is-small" type="text" placeholder="" style="width: 30px">
+      <input class="input is-small" type="text" placeholder=""
+             style="width: 30px">
     </div>
     <div class="control">
-      <input class="input is-small" type="text" disabled :value="'/ ' + totalPages" style="width: 40px; background-color: #fff; border-color: #fff">
+      <input class="input is-small" type="text" disabled :value="'/ ' + totalPages"
+             style="width: 40px; background-color: #fff; border-color: #fff">
 <!--      <span class="input is-small" style="width: 40px; background-color: #fff; border:0">/ {{totalPages}}</span>-->
       <!--      / {{ totalPages }}-->
     </div>

@@ -10,8 +10,8 @@ const router = createRouter({
       name: "home",
       component: ListFilesView,
       props: (route) => ({
-        pageSize: route.query.pageSize,
-        page: route.query.page,
+        pageSize: asInt(route.query.pageSize),
+        page: asInt(route.query.page),
         q: route.query.q,
       }),
     },
@@ -25,5 +25,9 @@ const router = createRouter({
     },
   ],
 });
+
+function asInt(v: any, defaultVal = undefined): number | undefined {
+  return parseInt(v) || defaultVal;
+}
 
 export default router;
