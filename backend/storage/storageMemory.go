@@ -114,6 +114,13 @@ func (m *memoryStorage) ListFiles(listQuery ListFilesQuery) (ListFilesResult, er
 	}, nil
 }
 
+func (m *memoryStorage) GetFile(id string) (StoredFile, error) {
+	if i, f := m.findFile(id); i >= 0 {
+		return f, nil
+	} else {
+		return StoredFile{}, errors.New("file not found")
+	}
+}
 func (m *memoryStorage) RemoveFile(id string) error {
 	if i, _ := m.findFile(id); i >= 0 {
 		m.filesMemStorage = append(m.filesMemStorage[:i], m.filesMemStorage[i+1:]...)

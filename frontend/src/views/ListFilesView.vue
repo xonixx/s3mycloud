@@ -71,7 +71,7 @@ function humanFileSize(bytes: number, si=false, dp=1) {
 
   <div>
     <div v-for="r in searchResults" class="res-item">
-      <a :href="'http://127.0.0.1:8080/api/dl/' + r.id" class="name">{{ r.name }}</a>
+      <a :href="`http://127.0.0.1:8080/api/file/${r.id}/dl`" class="name">{{ r.name }}</a>
       <span v-for="t in r.tags" class="tag is-primary is-light">{{ t }}</span>
       <div style="margin-top: -5px">
         <span class="date">{{ r.date }}</span>

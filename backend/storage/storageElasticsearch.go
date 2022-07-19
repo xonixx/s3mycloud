@@ -206,6 +206,17 @@ func checkError(r *esapi.Response, err error) error {
 	return nil
 }
 
+func (s *storageElasticsearch) GetFile(id string) (StoredFile, error) {
+	f, err := s.findFileEs(id)
+	if err != nil {
+		return StoredFile{}, err
+	}
+	if f != nil {
+		return *f, nil
+	} else {
+		return StoredFile{}, errors.New("file not found")
+	}
+}
 func (s *storageElasticsearch) RemoveFile(id string) error {
 	resp, err := s.esClient.Delete(INDEX, id, s.esClient.Delete.WithRefresh("true"))
 	if resp.StatusCode == 404 {

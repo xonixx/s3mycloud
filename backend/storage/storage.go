@@ -5,6 +5,7 @@ import "time"
 type Storage interface {
 	AddFile(fileData FileData) (StoredFile, error)
 	ListFiles(listQuery ListFilesQuery) (ListFilesResult, error)
+	GetFile(id string) (StoredFile, error)
 	RemoveFile(id string) error
 	AssignTags(id string, tags []string) error
 	RemoveTags(id string, tags []string) error

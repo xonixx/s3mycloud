@@ -118,7 +118,31 @@ func removeTagsHandler(c *gin.Context) {
 	c.IndentedJSON(http.StatusOK, success)
 }
 
+func downloadFileHandler(c *gin.Context) {
+	id := c.Param("id")
+	file, err := s.GetFile(id)
+	// TODO we should distinguish 404 vs 500
+	if err != nil {
+		c.IndentedJSON(http.StatusNotFound, err)
+	} else {
+		preSigneUrl, err := makePreSignedUrl(myConfig, file.ExternalId)
+		if err != nil {
+			c.IndentedJSON(http.StatusInternalServerError, err)
+		}
+		c.Redirect(http.StatusFound, preSigneUrl)
+	}
+}
+
+var myConfig Config
+
 func main() {
+	{
+		config, err := LoadConfig("../application-external.yml")
+		if err != nil {
+			panic(err)
+		}
+		myConfig = *config
+	}
 	{
 		err := addMockData()
 		if err != nil {
@@ -156,23 +180,13 @@ func setupServer() *gin.Engine {
 	router.DELETE("/api/file/:id", deleteFileHandler)
 	router.POST("/api/file/:id/tags", assignTagsHandler)
 	router.DELETE("/api/file/:id/tags", removeTagsHandler)
+	router.GET("/api/file/:id/dl", downloadFileHandler)
 	return router
 }
 
-func date(dateS string) int64 {
-	d, err := time.Parse("2 Jan 2006", dateS)
-	if err != nil {
-		panic(err)
-	}
-	return d.UnixMilli()
-}
 func addMockData() error {
-	config, err := LoadConfig("../application-external.yml")
-	if err != nil {
-		panic(err)
-	}
-	fmt.Println(config.S3.Bucket)
-	s3Files, err := listS3(*config)
+	fmt.Println(myConfig.S3.Bucket)
+	s3Files, err := listS3(myConfig)
 	if err != nil {
 		return err
 	}
@@ -191,7 +205,15 @@ func addMockData() error {
 	return nil
 }
 
-/*func addMockData() {
+/*
+func date(dateS string) int64 {
+	d, err := time.Parse("2 Jan 2006", dateS)
+	if err != nil {
+		panic(err)
+	}
+	return d.UnixMilli()
+}
+func addMockData() {
 	for i := 0; i < 2; i++ {
 		s.AddFile(storage.FileData{Name: "Report for boss.xlsx", Size: 50000, Created: date("15 Mar 2016"), Tags: []string{"document", "work"}})
 		s.AddFile(storage.FileData{Name: "Sing Now.mp3", Size: 2_500_000, Created: date("17 Apr 2019"), Tags: []string{"music", "pop"}})
