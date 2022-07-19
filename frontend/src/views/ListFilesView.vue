@@ -5,6 +5,12 @@ import moment from 'moment';
 import {onMounted, ref} from "vue";
 import axios from "axios";
 
+defineProps<{
+  q: string;
+  page: string;
+  pageSize: string;
+}>();
+
 const searchResults = ref([])
 
 /*for (let i = 0; i < 2; i++) {
@@ -56,6 +62,7 @@ function humanFileSize(bytes: number, si=false, dp=1) {
 </script>
 
 <template>
+  PS:{{ pageSize }}
   <!--  <main>-->
   <div class="field is-grouped">
     <div class="control is-expanded">
@@ -68,7 +75,7 @@ function humanFileSize(bytes: number, si=false, dp=1) {
     </div>
   </div>
 
-  <Pagination/>
+  <Pagination total-pages="10"/>
 
   <div>
     <div v-for="r in searchResults" class="res-item">

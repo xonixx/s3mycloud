@@ -9,6 +9,11 @@ const router = createRouter({
       path: "/",
       name: "home",
       component: ListFilesView,
+      props: (route) => ({
+        pageSize: route.query.pageSize,
+        page: route.query.page,
+        q: route.query.q,
+      }),
     },
     {
       path: "/about",
