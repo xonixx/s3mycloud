@@ -16,7 +16,7 @@ const {q, page, pageSize} = withDefaults(defineProps<{
   pageSize: 10
 });
 
-const qV = ref(q), pageV = ref(page), pageSizeV = ref(pageSize);
+const qV = ref<string>(q), pageV = ref<number>(page), pageSizeV = ref<number>(pageSize), totalRecords = ref<number>();
 
 const searchResults = ref([])
 
@@ -33,6 +33,7 @@ const searchResults = ref([])
 async function load() {
   const response = await axios.get(`http://127.0.0.1:8080/api/file?page=${pageV.value}&pageSize=${pageSizeV.value}`);
   searchResults.value = response.data.page.map((e) => ({...e, date: moment(e.uploaded).format("D MMM YYYY")}));
+  totalRecords.value = response.data.total;
 }
 
 onMounted(load)
@@ -93,7 +94,7 @@ function humanFileSize(bytes: number, si = false, dp = 1) {
     </div>
   </div>
 
-  <Pagination :page="pageV" :total-pages="100" :change-page="changePage"/>
+  <Pagination :page="pageV" :page-size="pageSizeV" :total-records="totalRecords" :change-page="changePage"/>
 
   <div>
     <div v-for="r in searchResults" class="res-item">
