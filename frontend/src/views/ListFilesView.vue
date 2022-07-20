@@ -41,7 +41,7 @@ onMounted(load)
 function changePage(p: number) {
   console.info("Changing page to ", p)
   router.push({ path: '/', query: { ...router.currentRoute.value.query, page: p } })
-  load()
+  setTimeout(load,10)
 }
 
 </script>
