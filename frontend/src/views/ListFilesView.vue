@@ -6,7 +6,7 @@ import {onMounted, ref} from "vue";
 import axios from "axios";
 import router from "@/router";
 
-const {q, page, pageSize} = withDefaults(defineProps<{
+const params = withDefaults(defineProps<{
   q: string;
   page: number;
   pageSize: number;
@@ -16,8 +16,7 @@ const {q, page, pageSize} = withDefaults(defineProps<{
   pageSize: 10
 });
 
-const qV = ref<string>(q), pageV = ref<number>(page), pageSizeV = ref<number>(pageSize), totalRecords = ref<number>();
-
+const totalRecords = ref<number>();
 const searchResults = ref([])
 
 /*for (let i = 0; i < 2; i++) {
@@ -31,7 +30,7 @@ const searchResults = ref([])
 }*/
 
 async function load() {
-  const response = await axios.get(`http://127.0.0.1:8080/api/file?page=${pageV.value}&pageSize=${pageSizeV.value}`);
+  const response = await axios.get(`http://127.0.0.1:8080/api/file?page=${params.page}&pageSize=${params.pageSize}`);
   searchResults.value = response.data.page.map((e) => ({...e, date: moment(e.uploaded).format("D MMM YYYY")}));
   totalRecords.value = response.data.total;
 }
@@ -41,9 +40,7 @@ onMounted(load)
 function changePage(p: number) {
   console.info("Changing page to ", p)
   router.push({ path: '/', query: { ...router.currentRoute.value.query, page: p } })
-  pageV.value = p;
   load()
-  // location.href = '?page='+p;
 }
 
 /**
@@ -81,7 +78,7 @@ function humanFileSize(bytes: number, si = false, dp = 1) {
 </script>
 
 <template>
-  PS:{{ pageSizeV }} P:{{ pageV }}
+  PS:{{ pageSize }} P:{{ page }}
   <!--  <main>-->
   <div class="field is-grouped">
     <div class="control is-expanded">
@@ -94,7 +91,7 @@ function humanFileSize(bytes: number, si = false, dp = 1) {
     </div>
   </div>
 
-  <Pagination :page="pageV" :page-size="pageSizeV" :total-records="totalRecords" :change-page="changePage"/>
+  <Pagination :page="page" :page-size="pageSize" :total-records="totalRecords" :change-page="changePage"/>
 
   <div>
     <div v-for="r in searchResults" class="res-item">
