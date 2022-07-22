@@ -44,7 +44,7 @@ const qRef = ref()
 
 function changeQuery(q: string) {
   console.info("Changing query to ", q)
-  router.push({path: '/', query: {...router.currentRoute.value.query, q}})
+  router.push({path: '/', query: {...router.currentRoute.value.query, q, page: 0}})
   setTimeout(load, 10)
 }
 
