@@ -20,16 +20,6 @@ const params = withDefaults(defineProps<{
 const totalRecords = ref<number>();
 const searchResults = ref([])
 
-/*for (let i = 0; i < 2; i++) {
-  searchResults.value.push(
-      {name: "Report for boss.xlsx", size: 50000, date: "15 Mar 2016", tags: ["document", "work"]},
-      {name: "Sing Now.mp3", size: 2_500_000, date: "17 Apr 2019", tags: ["music", "pop"]},
-      {name: "Test.txt", size: 100, date: "1 Jan 2008", tags: []},
-      {name: "CV (John Doe).pdf", size: 123_456, date: "9 Mar 2020", tags: ["work"]},
-      {name: "Some veeeeeeery loooooooooooong naaaaaaaaame.ext", size: 0, date: "31 Jan 2010", tags: ["test"]},
-  )
-}*/
-
 async function load() {
   const response = await axios.get(`http://127.0.0.1:8080/api/file?page=${params.page}&pageSize=${params.pageSize}`);
   searchResults.value = response.data.page.map((e) => ({...e, date: moment(e.uploaded).format("D MMM YYYY")}));
@@ -53,7 +43,6 @@ function changePageSize(ps: number) {
 </script>
 
 <template>
-  PS:{{ pageSize }} P:{{ page }}
   <!--  <main>-->
   <div class="field is-grouped">
     <div class="control is-expanded">
@@ -85,7 +74,14 @@ function changePageSize(ps: number) {
     </div>
   </div>
 
-  <!--  <Pagination/>-->
+  <Pagination
+      :page="page"
+      :page-size="pageSize"
+      :total-records="totalRecords"
+      :change-page="changePage"
+      :change-page-size="changePageSize"
+  />
+
   <!--  </main>-->
 </template>
 

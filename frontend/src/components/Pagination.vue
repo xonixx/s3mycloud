@@ -37,7 +37,6 @@ function isLastPage() {
 </script>
 
 <template>
-  PR {{ pageRef }} tr {{ totalRecords }}
   <!--  <div class="columns is-centered">-->
   <!--    <div class="column is-2 field is-grouped">-->
   <div class="field is-grouped">
