@@ -53,7 +53,7 @@ function isLastPage() {
     <div class="control" style="margin-right: 0">
       <input class="input is-small" type="text" placeholder=""
              :value="page+1"
-             @keyup.enter="myChangePage((parseInt(pageRef.value) || 1)-1)"
+             @keydown.enter="myChangePage((parseInt(pageRef.value) || 1)-1)"
              ref="pageRef"
              style="width: 50px">
     </div>

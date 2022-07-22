@@ -21,7 +21,7 @@ const totalRecords = ref<number>();
 const searchResults = ref([])
 
 async function load() {
-  const response = await axios.get(`http://127.0.0.1:8080/api/file?page=${params.page}&pageSize=${params.pageSize}`);
+  const response = await axios.get(`http://127.0.0.1:8080/api/file?page=${params.page}&pageSize=${params.pageSize}&name=${params.q}`);
   searchResults.value = response.data.page.map((e) => ({...e, date: moment(e.uploaded).format("D MMM YYYY")}));
   totalRecords.value = response.data.total;
 }
@@ -40,13 +40,22 @@ function changePageSize(ps: number) {
   setTimeout(load, 10)
 }
 
+const qRef = ref()
+
+function changeQuery(q: string) {
+  console.info("Changing query to ", q)
+  router.push({path: '/', query: {...router.currentRoute.value.query, q}})
+  setTimeout(load, 10)
+}
+
 </script>
 
 <template>
   <!--  <main>-->
   <div class="field is-grouped">
     <div class="control is-expanded">
-      <input class="input" type="text" placeholder="Enter search query...">
+      <input ref="qRef" :value="q" @keydown.enter="changeQuery(qRef.value)"
+             class="input" type="text" placeholder="Enter search query...">
     </div>
     <div class="control">
       <a class="button is-info">
