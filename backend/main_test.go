@@ -380,6 +380,30 @@ func TestListFilterName(t *testing.T) {
 		th.assertEqualsJsonPath(respJson, "bbb.txt", "page", "1", "name")
 	})
 }
+func TestListFilterCaseInsensitive(t *testing.T) {
+	withTestHelper(t, func(th testHelper) {
+		th.setupFiles([]M{
+			{
+				"name": "Aaa.mp3",
+				"size": 1000_000,
+				"tags": []string{"music", "pop"},
+			},
+		})
+		{
+			respJson := th.getExpectStatus("api/file?name=aaa", http.StatusOK)
+			th.assertEqualsJsonPath(respJson, 1, "total")
+			th.assertEquals(1, len(query(respJson, "page").([]interface{})))
+			th.assertEqualsJsonPath(respJson, "Aaa.mp3", "page", "0", "name")
+		}
+
+		{
+			respJson := th.getExpectStatus("api/file?name=AAA", http.StatusOK)
+			th.assertEqualsJsonPath(respJson, 1, "total")
+			th.assertEquals(1, len(query(respJson, "page").([]interface{})))
+			th.assertEqualsJsonPath(respJson, "Aaa.mp3", "page", "0", "name")
+		}
+	})
+}
 func TestListFilterNameNotFound(t *testing.T) {
 	withSampleFiles(t, func(th testHelper) {
 		respJson := th.getExpectStatus("api/file?name=absentName", http.StatusOK)

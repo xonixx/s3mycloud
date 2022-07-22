@@ -61,7 +61,7 @@ func (m *memoryStorage) ListFiles(listQuery ListFilesQuery) (ListFilesResult, er
 		matchedName = true
 		matchedTags = true
 		if listQuery.Name != "" {
-			matchedName = strings.Contains(f.Name, listQuery.Name)
+			matchedName = strings.Contains(strings.ToLower(f.Name), strings.ToLower(listQuery.Name))
 		}
 		if len(listQuery.Tags) > 0 {
 			for _, tag := range listQuery.Tags {
