@@ -40,8 +40,14 @@ onMounted(load)
 
 function changePage(p: number) {
   console.info("Changing page to ", p)
-  router.push({ path: '/', query: { ...router.currentRoute.value.query, page: p } })
-  setTimeout(load,10)
+  router.push({path: '/', query: {...router.currentRoute.value.query, page: p}})
+  setTimeout(load, 10)
+}
+
+function changePageSize(ps: number) {
+  console.info("Changing page size to ", ps)
+  router.push({path: '/', query: {...router.currentRoute.value.query, pageSize: ps}})
+  setTimeout(load, 10)
 }
 
 </script>
@@ -60,7 +66,13 @@ function changePage(p: number) {
     </div>
   </div>
 
-  <Pagination :page="page" :page-size="pageSize" :total-records="totalRecords" :change-page="changePage"/>
+  <Pagination
+      :page="page"
+      :page-size="pageSize"
+      :total-records="totalRecords"
+      :change-page="changePage"
+      :change-page-size="changePageSize"
+  />
 
   <div>
     <div v-for="r in searchResults" class="res-item">
@@ -73,7 +85,7 @@ function changePage(p: number) {
     </div>
   </div>
 
-<!--  <Pagination/>-->
+  <!--  <Pagination/>-->
   <!--  </main>-->
 </template>
 

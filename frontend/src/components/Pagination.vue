@@ -6,9 +6,11 @@ const props = defineProps<{
   pageSize: number
   totalRecords: number
   changePage: (p: number) => void
+  changePageSize: (ps: number) => void
 }>();
 
 const pageRef = ref()
+const pageSizeRef = ref()
 const pageSizes = [10,50,100]
 
 function totalPages(): number {
@@ -74,7 +76,7 @@ function isLastPage() {
     </div>
     <div class="control" style="margin-left: 50px">
       <div class="select is-small">
-        <select>
+        <select ref="pageSizeRef" :value="pageSize" @change="changePageSize(pageSizeRef.value)">
           <option v-for="ps in pageSizes" :value="ps">{{ps}}</option>
         </select>
       </div>
