@@ -15,7 +15,7 @@ const pageSizes = [10,50,100]
 
 function totalPages(): number {
   console.info("tr", props.totalRecords, "ps", props.pageSize)
-  return props.totalRecords / props.pageSize;
+  return Math.ceil(props.totalRecords / props.pageSize);
 }
 
 function myChangePage(p: number): void {
