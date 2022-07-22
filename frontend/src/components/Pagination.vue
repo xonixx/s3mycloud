@@ -9,6 +9,7 @@ const props = defineProps<{
 }>();
 
 const pageRef = ref()
+const pageSizes = [10,50,100]
 
 function totalPages(): number {
   console.info("tr", props.totalRecords, "ps", props.pageSize)
@@ -70,6 +71,16 @@ function isLastPage() {
       <button class="button is-small" :disabled="isLastPage()" @click="myChangePage(totalPages()-1)">
         <i class="fas fa-solid fa-angles-right"></i>
       </button>
+    </div>
+    <div class="control" style="margin-left: 50px">
+      <div class="select is-small">
+        <select>
+          <option v-for="ps in pageSizes" :value="ps">{{ps}}</option>
+        </select>
+      </div>
+    </div>
+    <div class="control">
+      per page
     </div>
   </div>
   <!--  </div>-->
