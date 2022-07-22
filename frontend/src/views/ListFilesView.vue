@@ -64,15 +64,18 @@ function changeQuery(q: string) {
     </div>
   </div>
 
-  <Pagination
-      :page="page"
-      :page-size="pageSize"
-      :total-records="totalRecords"
-      :change-page="changePage"
-      :change-page-size="changePageSize"
-  />
-
-  <div>
+  <div v-if="totalRecords === 0">
+    Nothing found
+  </div>
+  <div v-else>
+    Found records: {{ totalRecords }}
+    <Pagination
+        :page="page"
+        :page-size="pageSize"
+        :total-records="totalRecords"
+        :change-page="changePage"
+        :change-page-size="changePageSize"
+    />
     <div v-for="r in searchResults" class="res-item">
       <a :href="`http://127.0.0.1:8080/api/file/${r.id}/dl`" class="name">{{ r.name }}</a>
       <span v-for="t in r.tags" class="tag is-primary is-light">{{ t }}</span>
@@ -81,16 +84,14 @@ function changeQuery(q: string) {
         <span class="size">{{ humanFileSize(r.size, true) }}</span>
       </div>
     </div>
+    <Pagination
+        :page="page"
+        :page-size="pageSize"
+        :total-records="totalRecords"
+        :change-page="changePage"
+        :change-page-size="changePageSize"
+    />
   </div>
-
-  <Pagination
-      :page="page"
-      :page-size="pageSize"
-      :total-records="totalRecords"
-      :change-page="changePage"
-      :change-page-size="changePageSize"
-  />
-
   <!--  </main>-->
 </template>
 
