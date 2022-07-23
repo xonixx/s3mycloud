@@ -10,12 +10,33 @@ import (
 	"net/http/httptest"
 	"reflect"
 	"runtime/debug"
+	"s3mycloud/s3"
 	. "s3mycloud/util"
 	"sort"
 	"strconv"
 	"testing"
 	"time"
 )
+
+func init() {
+	println("HERE")
+	s3Connection = S3ConnMock{}
+}
+
+type S3ConnMock struct {
+}
+
+func (s S3ConnMock) List() ([]s3.File, error) {
+	panic("implement me")
+}
+
+func (s S3ConnMock) MakePreSignedGetUrl(key string) (string, error) {
+	return "PreSigned for GET: " + key, nil
+}
+
+func (s S3ConnMock) MakePreSignedPutUrl(key string) (string, error) {
+	return "PreSigned for PUT: " + key, nil
+}
 
 func toStringList(list []interface{}) []string {
 	var res []string = nil

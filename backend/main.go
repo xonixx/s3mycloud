@@ -140,7 +140,7 @@ func downloadFileHandler(c *gin.Context) {
 }
 
 var myConfig Config
-var s3Connection s3.Connection
+var s3Connection s3.Operations
 
 func main() {
 	{

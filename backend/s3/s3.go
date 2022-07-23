@@ -26,7 +26,13 @@ type Connection struct {
 	presignClient s3.PresignClient
 }
 
-func Connect(conf Config) (Connection, error) {
+type Operations interface {
+	List() ([]File, error)
+	MakePreSignedGetUrl(key string) (string, error)
+	MakePreSignedPutUrl(key string) (string, error)
+}
+
+func Connect(conf Config) (*Connection, error) {
 	cfg, err := config.LoadDefaultConfig(context.TODO(),
 		config.WithRegion(conf.Region),
 		config.WithEndpointResolverWithOptions(aws.EndpointResolverWithOptionsFunc(
@@ -36,11 +42,11 @@ func Connect(conf Config) (Connection, error) {
 		config.WithCredentialsProvider(credentials.NewStaticCredentialsProvider(conf.AccessKey, conf.SecretKey, "")))
 	if err != nil {
 		//log.Fatal(err)
-		return Connection{}, err
+		return nil, err
 	}
 
 	client := s3.NewFromConfig(cfg)
-	return Connection{
+	return &Connection{
 		client:        *client,
 		presignClient: *s3.NewPresignClient(client),
 		config:        conf,
