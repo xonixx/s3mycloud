@@ -1,16 +1,17 @@
 import { ref } from "vue";
+import { UploadableFile } from "./UploadableFile";
 
 export default function () {
-  const files = ref([]);
+  const files = ref<UploadableFile[]>([]);
 
-  function addFiles(newFiles) {
+  function addFiles(newFiles: FileList) {
     let newUploadableFiles = [...newFiles]
       .map((file) => new UploadableFile(file))
       .filter((file) => !fileExists(file.id));
     files.value = files.value.concat(newUploadableFiles);
   }
 
-  function fileExists(otherId) {
+  function fileExists(otherId:string):boolean {
     return files.value.some(({ id }) => id === otherId);
   }
 
@@ -21,13 +22,4 @@ export default function () {
   }
 
   return { files, addFiles, removeFile };
-}
-
-class UploadableFile {
-  constructor(file) {
-    this.file = file;
-    this.id = `${file.name}-${file.size}-${file.lastModified}-${file.type}`;
-    this.url = URL.createObjectURL(file);
-    this.status = null;
-  }
 }

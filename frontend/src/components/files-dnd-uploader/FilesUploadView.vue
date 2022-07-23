@@ -45,7 +45,7 @@ import useFileList from "./file-list";
 
 const { files, addFiles, removeFile } = useFileList();
 
-function onInputChange(e) {
+function onInputChange(e:Event & { target: HTMLInputElement }) {
   addFiles(e.target.files);
   e.target.value = null; // reset so that selecting the same file again will still cause it to fire this change
 }

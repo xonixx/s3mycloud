@@ -1,4 +1,6 @@
-export async function uploadFile(file, url) {
+import type { UploadableFile } from "./UploadableFile";
+
+export async function uploadFile(file: UploadableFile, url: string) {
   // set up the request data
   let formData = new FormData();
   formData.append("file", file.file);
@@ -13,16 +15,16 @@ export async function uploadFile(file, url) {
   return response;
 }
 
-export function uploadFiles(files, url) {
+export function uploadFiles(files: UploadableFile[], url: string) {
   return Promise.all(files.map((file) => uploadFile(file, url)));
 }
 
-export default function createUploader(url) {
+export default function createUploader(url: string) {
   return {
-    uploadFile: function (file) {
+    uploadFile: function (file: UploadableFile) {
       return uploadFile(file, url);
     },
-    uploadFiles: function (files) {
+    uploadFiles: function (files: UploadableFile[]) {
       return uploadFiles(files, url);
     },
   };
