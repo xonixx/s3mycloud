@@ -56,33 +56,33 @@ import createUploader from "./file-uploader";
 const { uploadFiles } = createUploader("YOUR URL HERE");
 </script>
 
-<style lang="css">
+<!--<style lang="css">
 html {
   height: 100%;
   width: 100%;
   background-color: #b6d6f5;
 
   /* Overlapping Stripes Background, based off https://codepen.io/MinzCode/pen/Exgpqpe */
-  --color1: rgba(55, 165, 255, 0.35);
-  --color2: rgba(96, 181, 250, 0.35);
-  --rotation: 135deg;
-  --size: 10px;
+  &#45;&#45;color1: rgba(55, 165, 255, 0.35);
+  &#45;&#45;color2: rgba(96, 181, 250, 0.35);
+  &#45;&#45;rotation: 135deg;
+  &#45;&#45;size: 10px;
   background-blend-mode: multiply;
   background-image: repeating-linear-gradient(
-      var(--rotation),
-      var(--color1) calc(var(--size) * 0),
-      var(--color1) calc(var(--size) * 9),
-      var(--color2) calc(var(--size) * 9),
-      var(--color2) calc(var(--size) * 12),
-      var(--color1) calc(var(--size) * 12)
+      var(&#45;&#45;rotation),
+      var(&#45;&#45;color1) calc(var(&#45;&#45;size) * 0),
+      var(&#45;&#45;color1) calc(var(&#45;&#45;size) * 9),
+      var(&#45;&#45;color2) calc(var(&#45;&#45;size) * 9),
+      var(&#45;&#45;color2) calc(var(&#45;&#45;size) * 12),
+      var(&#45;&#45;color1) calc(var(&#45;&#45;size) * 12)
     ),
     repeating-linear-gradient(
-      calc(var(--rotation) + 90deg),
-      var(--color1) calc(var(--size) * 0),
-      var(--color1) calc(var(--size) * 9),
-      var(--color2) calc(var(--size) * 9),
-      var(--color2) calc(var(--size) * 12),
-      var(--color1) calc(var(--size) * 12)
+      calc(var(&#45;&#45;rotation) + 90deg),
+      var(&#45;&#45;color1) calc(var(&#45;&#45;size) * 0),
+      var(&#45;&#45;color1) calc(var(&#45;&#45;size) * 9),
+      var(&#45;&#45;color2) calc(var(&#45;&#45;size) * 9),
+      var(&#45;&#45;color2) calc(var(&#45;&#45;size) * 12),
+      var(&#45;&#45;color1) calc(var(&#45;&#45;size) * 12)
     );
 }
 
@@ -91,7 +91,7 @@ body {
   margin: 0;
   padding: 0;
 }
-</style>
+</style>-->
 
 <style scoped lang="scss">
 #app {

@@ -8,7 +8,7 @@ const router = createRouter({
   routes: [
     {
       path: "/",
-      name: "home",
+      name: "list",
       component: ListFilesView,
       props: (route) => ({
         pageSize: asInt(route.query.pageSize),
