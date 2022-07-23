@@ -3,28 +3,29 @@ import { BACKEND_BASE_URL } from "@/urls";
 import axios from "axios";
 
 export async function uploadFile(file: UploadableFile) {
-  // set up the request data
-  let formData = new FormData();
-  formData.append("file", file.file);
-
   // track status and upload file
   file.status = "loading";
 
-  const response1: { data: { id: string; uploadUrl: string } } =
-    await axios.post(BACKEND_BASE_URL + "/api/file/upload", {
-      name: file.file.name,
-      size: file.file.size,
-      tags: ["TODO"],
+  try {
+    const response1: { data: { id: string; uploadUrl: string } } =
+      await axios.post(BACKEND_BASE_URL + "/api/file/upload", {
+        name: file.file.name,
+        size: file.file.size,
+        tags: ["TODO"],
+      });
+
+    const response2 = await axios.put(response1.data.uploadUrl, file.file, {
+      headers: {
+        "Content-Type": file.file.type,
+      },
     });
-
-  // TODO handle error
-
-  const response2 = await axios.put(response1.data.uploadUrl, formData);
-
-  // TODO handle error
+  } catch (e) {
+    console.error(e);
+    file.status = false;
+    return;
+  }
 
   // change status to indicate the success of the upload request
-  // file.status = response.ok;
   file.status = true;
 }
 
