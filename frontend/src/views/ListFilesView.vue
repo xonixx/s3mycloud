@@ -6,6 +6,7 @@ import moment from "moment";
 import { onMounted, ref } from "vue";
 import axios from "axios";
 import router from "@/router";
+import {BACKEND_BASE_URL} from "@/urls";
 
 const params = withDefaults(
   defineProps<{
@@ -25,7 +26,7 @@ const searchResults = ref([]);
 
 async function load() {
   const response = await axios.get(
-    `http://127.0.0.1:8080/api/file?page=${params.page}&pageSize=${params.pageSize}&name=${params.q}`
+    `${BACKEND_BASE_URL}/api/file?page=${params.page}&pageSize=${params.pageSize}&name=${params.q}`
   );
   searchResults.value = response.data.page.map((e) => ({
     ...e,
@@ -95,7 +96,7 @@ function changeQuery(q: string) {
       :change-page-size="changePageSize"
     />
     <div v-for="r in searchResults" class="res-item">
-      <a :href="`http://127.0.0.1:8080/api/file/${r.id}/dl`" class="name">{{
+      <a :href="`${BACKEND_BASE_URL}/api/file/${r.id}/dl`" class="name">{{
         r.name
       }}</a>
       <span v-for="t in r.tags" class="tag is-primary is-light">{{ t }}</span>
