@@ -35,13 +35,13 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 // Components
-import DropZone from "./components/DropZone.vue";
-import FilePreview from "./components/FilePreview.vue";
+import DropZone from "./DropZone.vue";
+import FilePreview from "./FilePreview.vue";
 
 // File Management
-import useFileList from "./compositions/file-list";
+import useFileList from "./file-list";
 
 const { files, addFiles, removeFile } = useFileList();
 
@@ -51,12 +51,12 @@ function onInputChange(e) {
 }
 
 // Uploader
-import createUploader from "./compositions/file-uploader";
+import createUploader from "./file-uploader";
 
 const { uploadFiles } = createUploader("YOUR URL HERE");
 </script>
 
-<style lang="stylus">
+<style lang="css">
 html {
   height: 100%;
   width: 100%;
@@ -75,15 +75,15 @@ html {
       var(--color2) calc(var(--size) * 9),
       var(--color2) calc(var(--size) * 12),
       var(--color1) calc(var(--size) * 12)
-  ),
-  repeating-linear-gradient(
+    ),
+    repeating-linear-gradient(
       calc(var(--rotation) + 90deg),
       var(--color1) calc(var(--size) * 0),
       var(--color1) calc(var(--size) * 9),
       var(--color2) calc(var(--size) * 9),
       var(--color2) calc(var(--size) * 12),
       var(--color1) calc(var(--size) * 12)
-  );
+    );
 }
 
 body {
@@ -93,7 +93,7 @@ body {
 }
 </style>
 
-<style scoped lang="stylus">
+<style scoped lang="scss">
 #app {
   font-family: Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
@@ -116,12 +116,10 @@ body {
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
   transition: .2s ease;
 
-&
-[data-active=true] {
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
-  background: #ffffffcc;
-}
-
+  &[data-active=true] {
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+    background: #ffffffcc;
+  }
 }
 
 label {
@@ -129,25 +127,26 @@ label {
   cursor: pointer;
   display: block;
 
-span {
-  display: block;
-}
+  span {
+    display: block;
+  }
 
-input[type=file]:not(:focus-visible) {
-/ / Visually Hidden Styles taken from Bootstrap 5 position: absolute !important;
-  width: 1px !important;
-  height: 1px !important;
-  padding: 0 !important;
-  margin: -1px !important;
-  overflow: hidden !important;
-  clip: rect(0, 0, 0, 0) !important;
-  white-space: nowrap !important;
-  border: 0 !important;
-}
+  input[type=file]:not(:focus-visible) {
+    /*Visually Hidden Styles taken from Bootstrap 5*/
+    position:absolute !important;
+    width: 1px !important;
+    height: 1px !important;
+    padding: 0 !important;
+    margin: -1px !important;
+    overflow: hidden !important;
+    clip: rect(0, 0, 0, 0) !important;
+    white-space: nowrap !important;
+    border: 0 !important;
+  }
 
-.smaller {
-  font-size: 16px;
-}
+  .smaller {
+    font-size: 16px;
+  }
 
 }
 

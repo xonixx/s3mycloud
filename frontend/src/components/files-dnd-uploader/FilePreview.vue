@@ -21,7 +21,7 @@
   </component>
 </template>
 
-<script setup>
+<script setup lang="ts">
 defineProps({
   file: { type: Object, required: true },
   tag: { type: String, default: "li" },
@@ -30,7 +30,7 @@ defineProps({
 defineEmits(["remove"]);
 </script>
 
-<style scoped lang="stylus">
+<style scoped lang="scss">
 .file-preview {
   width: 20%;
   margin: 1rem 2.5%;

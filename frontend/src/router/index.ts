@@ -1,6 +1,7 @@
 import { createRouter, createWebHistory } from "vue-router";
 // import HomeView from "../views/HomeView.vue";
 import ListFilesView from "../views/ListFilesView.vue";
+import FilesUploadView from "../components/files-dnd-uploader/FilesUploadView.vue";
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -14,6 +15,11 @@ const router = createRouter({
         page: asInt(route.query.page),
         q: route.query.q,
       }),
+    },
+    {
+      path: "/upload",
+      name: "upload",
+      component: FilesUploadView,
     },
     {
       path: "/about",
