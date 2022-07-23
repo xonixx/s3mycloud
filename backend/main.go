@@ -28,10 +28,11 @@ func uploadMetadataHandler(c *gin.Context) {
 
 	now := time.Now()
 	f, err := s.AddFile(storage.FileData{
-		Name:    newFileRequest.Name,
-		Size:    *newFileRequest.Size,
-		Tags:    newFileRequest.Tags,
-		Created: &now,
+		Name:       newFileRequest.Name,
+		ExternalId: newFileRequest.Name, // TODO should we add ID to limit the prob for collisions? Current behavior: file overwritten
+		Size:       *newFileRequest.Size,
+		Tags:       newFileRequest.Tags,
+		Created:    &now,
 	})
 	if err != nil {
 		fmt.Println("err:", err)
@@ -41,7 +42,7 @@ func uploadMetadataHandler(c *gin.Context) {
 
 	var response uploadMetadataResponse
 	response.Id = f.Id
-	response.UploadUrl, err = s3Connection.MakePreSignedPutUrl(newFileRequest.Name) // TODO should we add ID to limit the prob for collisions?
+	response.UploadUrl, err = s3Connection.MakePreSignedPutUrl(f.ExternalId)
 	if err != nil {
 		fmt.Println("err:", err)
 		c.IndentedJSON(http.StatusInternalServerError, err)
