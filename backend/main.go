@@ -126,7 +126,7 @@ func downloadFileHandler(c *gin.Context) {
 	if err != nil {
 		c.IndentedJSON(http.StatusNotFound, err)
 	} else {
-		preSigneUrl, err := s3.MakePreSignedUrl(s3Config, file.ExternalId)
+		preSigneUrl, err := s3Connection.MakePreSignedUrl(file.ExternalId)
 		if err != nil {
 			c.IndentedJSON(http.StatusInternalServerError, err)
 		}
@@ -135,7 +135,7 @@ func downloadFileHandler(c *gin.Context) {
 }
 
 var myConfig Config
-var s3Config s3.Config
+var s3Connection s3.Connection
 
 func main() {
 	{
@@ -144,12 +144,15 @@ func main() {
 			panic(err)
 		}
 		myConfig = *config
-		s3Config = s3.Config{
+		s3Connection, err = s3.Connect(s3.Config{
 			Bucket:    myConfig.S3.Bucket,
 			AccessKey: myConfig.S3.AccessKey,
 			SecretKey: myConfig.S3.SecretKey,
 			Endpoint:  myConfig.S3.Endpoint,
 			Region:    myConfig.S3.Region,
+		})
+		if err != nil {
+			panic(err)
 		}
 	}
 	{
@@ -195,7 +198,7 @@ func setupServer() *gin.Engine {
 
 func addMockData() error {
 	//fmt.Println(myConfig.S3.Bucket)
-	s3Files, err := s3.ListS3(s3Config)
+	s3Files, err := s3Connection.List()
 	if err != nil {
 		return err
 	}

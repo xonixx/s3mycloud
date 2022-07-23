@@ -20,8 +20,12 @@ type Config struct {
 	Region    string
 }
 
-// TODO this should be executed only once and cached
-func getS3Client(conf Config) (s3.Client, error) {
+type Connection struct {
+	config Config
+	client s3.Client
+}
+
+func Connect(conf Config) (Connection, error) {
 	cfg, err := config.LoadDefaultConfig(context.TODO(),
 		config.WithRegion(conf.Region),
 		config.WithEndpointResolverWithOptions(aws.EndpointResolverWithOptionsFunc(
@@ -31,24 +35,18 @@ func getS3Client(conf Config) (s3.Client, error) {
 		config.WithCredentialsProvider(credentials.NewStaticCredentialsProvider(conf.AccessKey, conf.SecretKey, "")))
 	if err != nil {
 		//log.Fatal(err)
-		return s3.Client{}, err
+		return Connection{}, err
 	}
 
 	// Create an Amazon S3 service client
 	client := s3.NewFromConfig(cfg)
-	return *client, nil
+	return Connection{client: *client, config: conf}, nil
 }
 
-func ListS3(conf Config) ([]File, error) {
-	client, err := getS3Client(conf)
-	if err != nil {
-		//log.Fatal(err)
-		return nil, err
-	}
-
+func (conn *Connection) List() ([]File, error) {
 	// Get the first page of results for ListObjectsV2 for a bucket
-	output, err := client.ListObjectsV2(context.TODO(), &s3.ListObjectsV2Input{
-		Bucket: aws.String(conf.Bucket),
+	output, err := conn.client.ListObjectsV2(context.TODO(), &s3.ListObjectsV2Input{
+		Bucket: aws.String(conn.config.Bucket),
 	})
 	if err != nil {
 		//log.Fatal(err)
@@ -64,14 +62,10 @@ func ListS3(conf Config) ([]File, error) {
 	}), nil
 }
 
-func MakePreSignedUrl(config Config, key string) (string, error) {
-	client, err := getS3Client(config)
-	if err != nil {
-		return "", err
-	}
-	presignClient := s3.NewPresignClient(&client)
+func (conn *Connection) MakePreSignedUrl(key string) (string, error) {
+	presignClient := s3.NewPresignClient(&conn.client)
 	input := &s3.GetObjectInput{
-		Bucket: &config.Bucket,
+		Bucket: &conn.config.Bucket,
 		Key:    &key,
 	}
 	r, err := presignClient.PresignGetObject(context.TODO(), input, s3.WithPresignExpires(30*time.Minute))
