@@ -14,8 +14,8 @@ function isActive(routeName: string): boolean {
       <h1 class="title">
         S3MyCloud
         <span class="title is-4">
-          <a :class="{ active: isActive('list') }" href="/">List</a>
-          <a :class="{ active: isActive('upload') }" href="/upload">Upload</a>
+          <router-link :class="{ active: isActive('list') }" to="/">List</router-link>
+          <router-link :class="{ active: isActive('upload') }" to="/upload">Upload</router-link>
         </span>
       </h1>
       <RouterView />
