@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import {ref} from "vue";
 
 const props = defineProps<{
   page: number
@@ -9,9 +8,7 @@ const props = defineProps<{
   changePageSize: (ps: number) => void
 }>();
 
-const pageRef = ref()
-const pageSizeRef = ref()
-const pageSizes = [10,50,100]
+const pageSizes = [10, 50, 100]
 
 function totalPages(): number {
   console.info("tr", props.totalRecords, "ps", props.pageSize)
@@ -53,8 +50,7 @@ function isLastPage() {
     <div class="control" style="margin-right: 0">
       <input class="input is-small" type="text" placeholder=""
              :value="page+1"
-             @keydown.enter="myChangePage((parseInt(pageRef.value) || 1)-1)"
-             ref="pageRef"
+             @keydown.enter="myChangePage((parseInt($event.target.value) || 1)-1)"
              style="width: 50px">
     </div>
     <div class="control">
@@ -75,8 +71,8 @@ function isLastPage() {
     </div>
     <div class="control" style="margin-left: 50px">
       <div class="select is-small">
-        <select ref="pageSizeRef" :value="pageSize" @change="changePageSize(pageSizeRef.value)">
-          <option v-for="ps in pageSizes" :value="ps">{{ps}}</option>
+        <select :value="pageSize" @change="changePageSize($event.target.value)">
+          <option v-for="ps in pageSizes" :value="ps">{{ ps }}</option>
         </select>
       </div>
     </div>

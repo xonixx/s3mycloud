@@ -36,7 +36,7 @@ function changePage(p: number) {
 
 function changePageSize(ps: number) {
   console.info("Changing page size to ", ps)
-  router.push({path: '/', query: {...router.currentRoute.value.query, pageSize: ps}})
+  router.push({path: '/', query: {...router.currentRoute.value.query, pageSize: ps, page: 0}})
   setTimeout(load, 10)
 }
 
