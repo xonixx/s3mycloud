@@ -41,7 +41,12 @@ func uploadMetadataHandler(c *gin.Context) {
 
 	var response uploadMetadataResponse
 	response.Id = f.Id
-	response.UploadUrl = "TODO" // TODO pre-signed URL for upload
+	response.UploadUrl, err = s3Connection.MakePreSignedPutUrl(newFileRequest.Name) // TODO should we add ID to limit the prob for collisions?
+	if err != nil {
+		fmt.Println("err:", err)
+		c.IndentedJSON(http.StatusInternalServerError, err)
+		return
+	}
 
 	c.IndentedJSON(http.StatusCreated, response)
 }
@@ -126,7 +131,7 @@ func downloadFileHandler(c *gin.Context) {
 	if err != nil {
 		c.IndentedJSON(http.StatusNotFound, err)
 	} else {
-		preSigneUrl, err := s3Connection.MakePreSignedUrl(file.ExternalId)
+		preSigneUrl, err := s3Connection.MakePreSignedGetUrl(file.ExternalId)
 		if err != nil {
 			c.IndentedJSON(http.StatusInternalServerError, err)
 		}

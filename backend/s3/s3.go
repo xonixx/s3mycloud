@@ -21,8 +21,9 @@ type Config struct {
 }
 
 type Connection struct {
-	config Config
-	client s3.Client
+	config        Config
+	client        s3.Client
+	presignClient s3.PresignClient
 }
 
 func Connect(conf Config) (Connection, error) {
@@ -38,9 +39,12 @@ func Connect(conf Config) (Connection, error) {
 		return Connection{}, err
 	}
 
-	// Create an Amazon S3 service client
 	client := s3.NewFromConfig(cfg)
-	return Connection{client: *client, config: conf}, nil
+	return Connection{
+		client:        *client,
+		presignClient: *s3.NewPresignClient(client),
+		config:        conf,
+	}, nil
 }
 
 func (conn *Connection) List() ([]File, error) {
@@ -62,13 +66,23 @@ func (conn *Connection) List() ([]File, error) {
 	}), nil
 }
 
-func (conn *Connection) MakePreSignedUrl(key string) (string, error) {
-	presignClient := s3.NewPresignClient(&conn.client)
+func (conn *Connection) MakePreSignedGetUrl(key string) (string, error) {
 	input := &s3.GetObjectInput{
 		Bucket: &conn.config.Bucket,
 		Key:    &key,
 	}
-	r, err := presignClient.PresignGetObject(context.TODO(), input, s3.WithPresignExpires(30*time.Minute))
+	r, err := conn.presignClient.PresignGetObject(context.TODO(), input, s3.WithPresignExpires(30*time.Minute))
+	if err != nil {
+		return "", err
+	}
+	return r.URL, nil
+}
+func (conn *Connection) MakePreSignedPutUrl(key string) (string, error) {
+	input := &s3.PutObjectInput{
+		Bucket: &conn.config.Bucket,
+		Key:    &key,
+	}
+	r, err := conn.presignClient.PresignPutObject(context.TODO(), input, s3.WithPresignExpires(30*time.Minute))
 	if err != nil {
 		return "", err
 	}
