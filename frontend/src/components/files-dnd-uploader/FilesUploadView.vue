@@ -45,7 +45,7 @@ import useFileList from "./file-list";
 
 const { files, addFiles, removeFile } = useFileList();
 
-function onInputChange(e:Event & { target: HTMLInputElement }) {
+function onInputChange(e: Event & { target: HTMLInputElement }) {
   addFiles(e.target.files);
   e.target.value = null; // reset so that selecting the same file again will still cause it to fire this change
 }
@@ -53,7 +53,7 @@ function onInputChange(e:Event & { target: HTMLInputElement }) {
 // Uploader
 import createUploader from "./file-uploader";
 
-const { uploadFiles } = createUploader("YOUR URL HERE");
+const { uploadFiles } = createUploader();
 </script>
 
 <!--<style lang="css">
@@ -114,9 +114,9 @@ body {
   padding: 50px;
   background: #ffffff55;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
-  transition: .2s ease;
+  transition: 0.2s ease;
 
-  &[data-active=true] {
+  &[data-active="true"] {
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
     background: #ffffffcc;
   }
@@ -131,9 +131,9 @@ label {
     display: block;
   }
 
-  input[type=file]:not(:focus-visible) {
+  input[type="file"]:not(:focus-visible) {
     /*Visually Hidden Styles taken from Bootstrap 5*/
-    position:absolute !important;
+    position: absolute !important;
     width: 1px !important;
     height: 1px !important;
     padding: 0 !important;
@@ -147,7 +147,6 @@ label {
   .smaller {
     font-size: 16px;
   }
-
 }
 
 .image-list {
