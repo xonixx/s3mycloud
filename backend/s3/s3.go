@@ -1,4 +1,4 @@
-package main
+package s3
 
 import (
 	"context"
@@ -12,16 +12,23 @@ import (
 	"time"
 )
 
+type Config struct {
+	Bucket    string
+	AccessKey string
+	SecretKey string
+	Endpoint  string
+	Region    string
+}
+
 // TODO this should be executed only once and cached
 func getS3Client(conf Config) (s3.Client, error) {
-	// Load the Shared AWS Configuration (~/.aws/config)
 	cfg, err := config.LoadDefaultConfig(context.TODO(),
-		config.WithRegion(conf.S3.Region),
+		config.WithRegion(conf.Region),
 		config.WithEndpointResolverWithOptions(aws.EndpointResolverWithOptionsFunc(
 			func(service, region string, options ...interface{}) (aws.Endpoint, error) {
-				return aws.Endpoint{URL: conf.S3.Endpoint}, nil
+				return aws.Endpoint{URL: conf.Endpoint}, nil
 			})),
-		config.WithCredentialsProvider(credentials.NewStaticCredentialsProvider(conf.S3.AccessKey, conf.S3.SecretKey, "")))
+		config.WithCredentialsProvider(credentials.NewStaticCredentialsProvider(conf.AccessKey, conf.SecretKey, "")))
 	if err != nil {
 		//log.Fatal(err)
 		return s3.Client{}, err
@@ -32,7 +39,7 @@ func getS3Client(conf Config) (s3.Client, error) {
 	return *client, nil
 }
 
-func listS3(conf Config) ([]S3File, error) {
+func ListS3(conf Config) ([]File, error) {
 	client, err := getS3Client(conf)
 	if err != nil {
 		//log.Fatal(err)
@@ -41,7 +48,7 @@ func listS3(conf Config) ([]S3File, error) {
 
 	// Get the first page of results for ListObjectsV2 for a bucket
 	output, err := client.ListObjectsV2(context.TODO(), &s3.ListObjectsV2Input{
-		Bucket: aws.String(conf.S3.Bucket),
+		Bucket: aws.String(conf.Bucket),
 	})
 	if err != nil {
 		//log.Fatal(err)
@@ -52,19 +59,19 @@ func listS3(conf Config) ([]S3File, error) {
 	//for _, object := range output.Contents {
 	//	log.Printf("key=%s size=%d", aws.ToString(object.Key), object.Size)
 	//}
-	return util.Map(output.Contents, func(o types.Object) S3File {
+	return util.Map(output.Contents, func(o types.Object) File {
 		return s3FileOf(o)
 	}), nil
 }
 
-func makePreSignedUrl(config Config, key string) (string, error) {
+func MakePreSignedUrl(config Config, key string) (string, error) {
 	client, err := getS3Client(config)
 	if err != nil {
 		return "", err
 	}
 	presignClient := s3.NewPresignClient(&client)
 	input := &s3.GetObjectInput{
-		Bucket: &config.S3.Bucket,
+		Bucket: &config.Bucket,
 		Key:    &key,
 	}
 	r, err := presignClient.PresignGetObject(context.TODO(), input, s3.WithPresignExpires(30*time.Minute))
@@ -74,26 +81,26 @@ func makePreSignedUrl(config Config, key string) (string, error) {
 	return r.URL, nil
 }
 
-type S3File struct {
+type File struct {
 	Key          string
 	Size         int64
 	LastModified time.Time
 }
 
-func s3FileOf(o types.Object) S3File {
-	return S3File{
+func s3FileOf(o types.Object) File {
+	return File{
 		Key:          *o.Key,
 		Size:         o.Size,
 		LastModified: *o.LastModified,
 	}
 }
 
-func (s3f S3File) Path() string {
+func (s3f File) Path() string {
 	parts := strings.Split(s3f.Key, "/")
 	pathParts := parts[:len(parts)-1]
 	return strings.Join(pathParts, "/")
 }
-func (s3f S3File) Name() string {
+func (s3f File) Name() string {
 	parts := strings.Split(s3f.Key, "/")
 	return parts[len(parts)-1]
 }
