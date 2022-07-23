@@ -21,19 +21,23 @@ function myChangePage(p: number): void {
   props.changePage(p);
 }
 
-function isFirstPage() {
+function isFirstPage(): boolean {
   return props.page == 0;
 }
 
-function isLastPage() {
+function isLastPage(): boolean {
   return props.page == totalPages() - 1;
+}
+
+function isVisible(): boolean {
+  return props.totalRecords > props.pageSize;
 }
 </script>
 
 <template>
   <!--  <div class="columns is-centered">-->
   <!--    <div class="column is-2 field is-grouped">-->
-  <div class="field is-grouped">
+  <div class="field is-grouped" v-if="isVisible()">
     <div class="control">
       <button
         class="button is-small"
