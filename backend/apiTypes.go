@@ -16,7 +16,7 @@ type uploadMetadataResponse struct {
 
 type confirmUploadRequest struct {
 	Id      string `json:"id" binding:"required"`
-	Success bool   `json:"success" binding:"required"`
+	Success *bool  `json:"success" binding:"required"` // using pointer to distinguish false from omitted
 	Error   string `json:"error"`
 }
 

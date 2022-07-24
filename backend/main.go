@@ -60,7 +60,12 @@ func confirmUploadHandler(c *gin.Context) {
 		return
 	}
 
-	if !confirmUploadRequest.Success {
+	if _, e := s.GetFile(confirmUploadRequest.Id); e != nil {
+		c.IndentedJSON(http.StatusNotFound, errorResponseOf(e))
+		return
+	}
+
+	if !*confirmUploadRequest.Success {
 		fmt.Println("Was error uploading file to S3: " + confirmUploadRequest.Error)
 		if e := s.RemoveFile(confirmUploadRequest.Id); e != nil {
 			c.IndentedJSON(http.StatusNotFound, errorResponseOf(e))

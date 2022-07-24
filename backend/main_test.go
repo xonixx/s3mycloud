@@ -598,9 +598,18 @@ func TestEmptyPage(t *testing.T) {
 	})
 }
 
-func TestConfirmUpload404(t *testing.T) {
+func TestConfirmUpload404_1(t *testing.T) {
 	withTestHelper(t, func(th testHelper) {
 		respJson := th.postExpectStatus("api/file/confirmUpload", M{"id": "doesNotExist", "success": true}, http.StatusNotFound)
 		fmt.Println(respJson)
+	})
+}
+func TestConfirmUpload404_2(t *testing.T) {
+	withSampleFiles1(t, func(th testHelper) {
+		respJson := th.postExpectStatus("api/file/confirmUpload", M{"id": "doesNotExist", "success": false}, http.StatusNotFound)
+		fmt.Println(respJson)
+	}, M{
+		"name": "file",
+		"size": 1,
 	})
 }
