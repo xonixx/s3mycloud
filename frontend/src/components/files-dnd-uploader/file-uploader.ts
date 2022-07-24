@@ -14,11 +14,30 @@ export async function uploadFile(file: UploadableFile) {
         tags: ["TODO"],
       });
 
-    const response2 = await axios.put(response1.data.uploadUrl, file.file, {
-      headers: {
-        "Content-Type": file.file.type,
-      },
-    });
+    try {
+      const response2 = await axios.put(response1.data.uploadUrl, file.file, {
+        headers: {
+          "Content-Type": file.file.type,
+        },
+      });
+      const response3 = await axios.post(
+        BACKEND_BASE_URL + "/api/file/confirmUpload",
+        {
+          id: response1.data.id,
+          success: true,
+        }
+      );
+    } catch (e1: any) {
+      const response3 = await axios.post(
+        BACKEND_BASE_URL + "/api/file/confirmUpload",
+        {
+          id: response1.data.id,
+          success: false,
+          error: e1.message,
+        }
+      );
+      throw e1;
+    }
   } catch (e) {
     console.error(e);
     file.status = false;
