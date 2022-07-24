@@ -258,6 +258,9 @@ func (th *testHelper) setupFiles(files []M) {
 func (th testHelper) existingId() string {
 	return query(th.fileJsons[1], "id").(string)
 }
+func (th testHelper) existingId0() string {
+	return query(th.fileJsons[0], "id").(string)
+}
 func (th testHelper) existingName() string {
 	return "bbb.txt"
 }
@@ -608,6 +611,26 @@ func TestConfirmUpload404_2(t *testing.T) {
 	withSampleFiles1(t, func(th testHelper) {
 		respJson := th.postExpectStatus("api/file/confirmUpload", M{"id": "doesNotExist", "success": false}, http.StatusNotFound)
 		fmt.Println(respJson)
+	}, M{
+		"name": "file",
+		"size": 1,
+	})
+}
+func TestConfirmUploadSuccess(t *testing.T) {
+	withSampleFiles1(t, func(th testHelper) {
+		respJson := th.postExpectStatus("api/file/confirmUpload", M{"id": th.existingId0(), "success": true}, http.StatusOK)
+		respJson = th.getExpectStatus("api/file", http.StatusOK)
+		th.assertEqualsJsonPath(respJson, 1, "total")
+	}, M{
+		"name": "file",
+		"size": 1,
+	})
+}
+func TestConfirmUploadFail(t *testing.T) {
+	withSampleFiles1(t, func(th testHelper) {
+		respJson := th.postExpectStatus("api/file/confirmUpload", M{"id": th.existingId0(), "success": false, "error": "Reason..."}, http.StatusOK)
+		respJson = th.getExpectStatus("api/file", http.StatusOK)
+		th.assertEqualsJsonPath(respJson, 0, "total")
 	}, M{
 		"name": "file",
 		"size": 1,
