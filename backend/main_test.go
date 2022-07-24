@@ -19,7 +19,6 @@ import (
 )
 
 func init() {
-	println("HERE")
 	s3Connection = S3ConnMock{}
 }
 
@@ -596,5 +595,12 @@ func TestEmptyPage(t *testing.T) {
 		respJson := th.getExpectStatus("api/file", http.StatusOK)
 		fmt.Println(respJson)
 		th.assertEquals(0, len(query(respJson, "page").([]interface{})))
+	})
+}
+
+func TestConfirmUpload404(t *testing.T) {
+	withTestHelper(t, func(th testHelper) {
+		respJson := th.postExpectStatus("api/file/confirmUpload", M{"id": "doesNotExist", "success": true}, http.StatusNotFound)
+		fmt.Println(respJson)
 	})
 }

@@ -53,36 +53,22 @@ func uploadMetadataHandler(c *gin.Context) {
 }
 
 func confirmUploadHandler(c *gin.Context) {
-	var newFileRequest uploadMetadataRequest
+	// TODO do we need a status field in File to track uploading result?
+	var confirmUploadRequest confirmUploadRequest
 
-	if err := c.BindJSON(&newFileRequest); err != nil {
+	if err := c.BindJSON(&confirmUploadRequest); err != nil {
 		return
 	}
 
-	now := time.Now()
-	f, err := s.AddFile(storage.FileData{
-		Name:       newFileRequest.Name,
-		ExternalId: newFileRequest.Name, // TODO should we add ID to limit the prob for collisions? Current behavior: file overwritten
-		Size:       *newFileRequest.Size,
-		Tags:       newFileRequest.Tags,
-		Created:    &now,
-	})
-	if err != nil {
-		fmt.Println("err:", err)
-		c.IndentedJSON(http.StatusInternalServerError, err)
-		return
+	if !confirmUploadRequest.Success {
+		fmt.Println("Was error uploading file to S3: " + confirmUploadRequest.Error)
+		if e := s.RemoveFile(confirmUploadRequest.Id); e != nil {
+			c.IndentedJSON(http.StatusNotFound, errorResponseOf(e))
+			return
+		}
 	}
 
-	var response uploadMetadataResponse
-	response.Id = f.Id
-	response.UploadUrl, err = s3Connection.MakePreSignedPutUrl(f.ExternalId)
-	if err != nil {
-		fmt.Println("err:", err)
-		c.IndentedJSON(http.StatusInternalServerError, err)
-		return
-	}
-
-	c.IndentedJSON(http.StatusCreated, response)
+	c.IndentedJSON(http.StatusOK, success)
 }
 
 var DefaultPageSize uint = 10
@@ -168,6 +154,7 @@ func downloadFileHandler(c *gin.Context) {
 		preSigneUrl, err := s3Connection.MakePreSignedGetUrl(file.ExternalId)
 		if err != nil {
 			c.IndentedJSON(http.StatusInternalServerError, err)
+			return
 		}
 		c.Redirect(http.StatusFound, preSigneUrl)
 	}

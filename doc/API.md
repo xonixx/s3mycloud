@@ -44,6 +44,18 @@ POST /api/file/confirmUpload
     "error": "error description"      # in case success=false
 }
 ```
+response (success):
+```
+{
+    "success": true
+}
+```
+response (error):
+```
+{
+    "error": "file not found"
+}
+```
 
 In case of error the metadata will be deleted. 
 
