@@ -52,6 +52,39 @@ func uploadMetadataHandler(c *gin.Context) {
 	c.IndentedJSON(http.StatusCreated, response)
 }
 
+func confirmUploadHandler(c *gin.Context) {
+	var newFileRequest uploadMetadataRequest
+
+	if err := c.BindJSON(&newFileRequest); err != nil {
+		return
+	}
+
+	now := time.Now()
+	f, err := s.AddFile(storage.FileData{
+		Name:       newFileRequest.Name,
+		ExternalId: newFileRequest.Name, // TODO should we add ID to limit the prob for collisions? Current behavior: file overwritten
+		Size:       *newFileRequest.Size,
+		Tags:       newFileRequest.Tags,
+		Created:    &now,
+	})
+	if err != nil {
+		fmt.Println("err:", err)
+		c.IndentedJSON(http.StatusInternalServerError, err)
+		return
+	}
+
+	var response uploadMetadataResponse
+	response.Id = f.Id
+	response.UploadUrl, err = s3Connection.MakePreSignedPutUrl(f.ExternalId)
+	if err != nil {
+		fmt.Println("err:", err)
+		c.IndentedJSON(http.StatusInternalServerError, err)
+		return
+	}
+
+	c.IndentedJSON(http.StatusCreated, response)
+}
+
 var DefaultPageSize uint = 10
 
 func listFilesHandler(c *gin.Context) {
@@ -194,6 +227,7 @@ func setupServer() *gin.Engine {
 	router.Use(CORSMiddleware())
 	// TODO use https://github.com/gin-gonic/gin#grouping-routes
 	router.POST("/api/file/upload", uploadMetadataHandler)
+	router.POST("/api/file/confirmUpload", confirmUploadHandler)
 	router.GET("/api/file", listFilesHandler)
 	router.DELETE("/api/file/:id", deleteFileHandler)
 	router.POST("/api/file/:id/tags", assignTagsHandler)

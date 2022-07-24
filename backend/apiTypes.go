@@ -14,6 +14,12 @@ type uploadMetadataResponse struct {
 	Error     string `json:"error,omitempty"`
 }
 
+type confirmUploadRequest struct {
+	Id      string `json:"id" binding:"required"`
+	Success bool   `json:"success" binding:"required"`
+	Error   string `json:"error"`
+}
+
 type errorResponse struct {
 	Error string `json:"error,omitempty"`
 }
