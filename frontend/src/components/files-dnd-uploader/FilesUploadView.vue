@@ -28,7 +28,7 @@
                 @remove="removeFile"
               />
             </ul>-->
-      <table class="table is-fullwidth files-table">
+      <table class="table is-fullwidth files-table" v-if="files.length">
         <tr>
           <th>Name</th>
           <th>Size</th>
