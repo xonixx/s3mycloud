@@ -5,17 +5,17 @@
 
     <span
       class="status-indicator loading-indicator"
-      v-show="file.status == 'loading'"
+      v-show="file.status === 'loading'"
       >In Progress</span
     >
     <span
       class="status-indicator success-indicator"
-      v-show="file.status == true"
+      v-show="file.status === true"
       >Uploaded</span
     >
     <span
       class="status-indicator failure-indicator"
-      v-show="file.status == false"
+      v-show="file.status === false"
       >Error</span
     >
   </component>
@@ -38,56 +38,56 @@ defineEmits(["remove"]);
   aspect-ratio: 1/1;
   overflow: hidden;
 
-img {
-  width: 100%;
-  height: 100%;
-  display: block;
-  object-fit: cover;
-}
+  img {
+    width: 100%;
+    height: 100%;
+    display: block;
+    object-fit: cover;
+  }
 
-.close-icon, .status-indicator {
-  --size: 20px;
-  position: absolute;
-  line-height: var(--size);
-  height: var(--size);
-  border-radius: var(--size);
-  box-shadow: 0 0 5px currentColor;
-  right: 0.25rem;
-  appearance: none;
-  border: 0;
-  padding: 0;
-}
+  .close-icon,
+  .status-indicator {
+    --size: 20px;
+    position: absolute;
+    line-height: var(--size);
+    height: var(--size);
+    border-radius: var(--size);
+    box-shadow: 0 0 5px currentColor;
+    right: 0.25rem;
+    appearance: none;
+    border: 0;
+    padding: 0;
+  }
 
-.close-icon {
-  width: var(--size);
-  font-size: var(--size);
-  background: #933;
-  color: #fff;
-  top: 0.25rem;
-  cursor: pointer;
-}
+  .close-icon {
+    width: var(--size);
+    font-size: var(--size);
+    background: #933;
+    color: #fff;
+    top: 0.25rem;
+    cursor: pointer;
+  }
 
-.status-indicator {
-  font-size: calc(0.75 * var(--size));
-  bottom: 0.25rem;
-  padding: 0 10px;
-}
+  .status-indicator {
+    font-size: calc(0.75 * var(--size));
+    bottom: 0.25rem;
+    padding: 0 10px;
+  }
 
-.loading-indicator {
-  animation: pulse 1.5s linear 0s infinite;
-  color: #000;
-}
+  .loading-indicator {
+    animation: pulse 1.5s linear 0s infinite;
+    color: #000;
+  }
 
-.success-indicator {
-  background: #6c6;
-  color: #040;
-}
+  .success-indicator {
+    background: #6c6;
+    color: #040;
+  }
 
-.failure-indicator {
-  background: #933;
-  color: #fff;
-}
-
+  .failure-indicator {
+    background: #933;
+    color: #fff;
+  }
 }
 
 @keyframes pulse {

@@ -19,15 +19,35 @@
 
         <input type="file" id="file-input" multiple @change="onInputChange" />
       </label>
-      <ul class="image-list" v-show="files.length">
-        <FilePreview
-          v-for="file of files"
-          :key="file.id"
-          :file="file"
-          tag="li"
-          @remove="removeFile"
-        />
-      </ul>
+      <!--      <ul class="image-list" v-show="files.length">
+              <FilePreview
+                v-for="file of files"
+                :key="file.id"
+                :file="file"
+                tag="li"
+                @remove="removeFile"
+              />
+            </ul>-->
+      <table class="table is-fullwidth">
+        <tr>
+          <th>Name</th>
+          <th>Size</th>
+          <th>Status</th>
+          <th></th>
+        </tr>
+        <tr v-for="file in files" :key="file.id">
+          <td>{{ file.file.name }}</td>
+          <td>{{ humanFileSize(file.file.size, true) }}</td>
+          <td>
+            <span v-if="file.status === 'loading'">In Progress</span>
+            <span v-else-if="file.status === true">Uploaded</span>
+            <span v-else-if="file.status === false">Error</span>
+          </td>
+          <td>
+            <button @click="removeFile(file)">&times;</button>
+          </td>
+        </tr>
+      </table>
     </DropZone>
     <button @click.prevent="uploadFiles(files)" class="upload-button">
       Upload
@@ -36,6 +56,7 @@
 </template>
 
 <script setup lang="ts">
+import { humanFileSize } from "@/assets/lib";
 // Components
 import DropZone from "./DropZone.vue";
 import FilePreview from "./FilePreview.vue";
