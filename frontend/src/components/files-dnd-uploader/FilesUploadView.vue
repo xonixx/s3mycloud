@@ -28,6 +28,25 @@
                 @remove="removeFile"
               />
             </ul>-->
+
+      <div class="field is-horizontal">
+        <div class="field-label is-normal">
+          <label class="label">Tags</label>
+        </div>
+        <div class="field-body">
+          <div class="field">
+            <div class="control">
+              <input
+                v-model="tags"
+                class="input"
+                type="text"
+                placeholder="Tags to assign (comma-separated)"
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+
       <table class="table is-fullwidth files-table" v-if="files.length">
         <tr>
           <th>Name</th>
@@ -49,7 +68,11 @@
         </tr>
       </table>
     </DropZone>
-    <button @click.prevent="uploadFiles(files)" class="upload-button">
+    <button
+      @click.prevent="uploadFiles(files)"
+      class="button is-primary upload-button"
+      :disabled="!files.length || !tags"
+    >
       Upload
     </button>
   </div>
@@ -66,6 +89,8 @@ import useFileList from "./file-list";
 
 const { files, addFiles, removeFile } = useFileList();
 
+const tags = ref<string>();
+
 function onInputChange(e: Event & { target: HTMLInputElement }) {
   addFiles(e.target.files);
   e.target.value = null; // reset so that selecting the same file again will still cause it to fire this change
@@ -73,6 +98,7 @@ function onInputChange(e: Event & { target: HTMLInputElement }) {
 
 // Uploader
 import createUploader from "./file-uploader";
+import { ref } from "vue";
 
 const { uploadFiles } = createUploader();
 </script>
