@@ -2,7 +2,7 @@ import type { UploadableFile } from "./UploadableFile";
 import { BACKEND_BASE_URL } from "@/urls";
 import axios from "axios";
 
-export async function uploadFile(file: UploadableFile) {
+export async function uploadFile(file: UploadableFile, tags: string[]) {
   // track status and upload file
   file.status = "loading";
 
@@ -11,7 +11,7 @@ export async function uploadFile(file: UploadableFile) {
       await axios.post(BACKEND_BASE_URL + "/api/file/upload", {
         name: file.file.name,
         size: file.file.size,
-        tags: ["TODO"],
+        tags,
       });
 
     try {
@@ -48,17 +48,14 @@ export async function uploadFile(file: UploadableFile) {
   file.status = true;
 }
 
-export function uploadFiles(files: UploadableFile[]) {
-  return Promise.all(files.map((file) => uploadFile(file)));
+export function uploadFiles(files: UploadableFile[], tags: string[]) {
+  return Promise.all(files.map((file) => uploadFile(file, tags)));
 }
 
 export default function createUploader() {
   return {
-    uploadFile: function (file: UploadableFile) {
-      return uploadFile(file);
-    },
-    uploadFiles: function (files: UploadableFile[]) {
-      return uploadFiles(files);
+    uploadFiles: function (files: UploadableFile[], tags: string[]) {
+      return uploadFiles(files, tags);
     },
   };
 }

@@ -29,47 +29,49 @@
               />
             </ul>-->
 
-      <div class="field is-horizontal">
-        <div class="field-label is-normal">
-          <label class="label">Tags</label>
-        </div>
-        <div class="field-body">
-          <div class="field">
-            <div class="control">
-              <input
-                v-model="tags"
-                class="input"
-                type="text"
-                placeholder="Tags to assign (comma-separated)"
-              />
+      <template v-if="files.length">
+        <div class="field is-horizontal">
+          <div class="field-label is-normal">
+            <label class="label">Tags</label>
+          </div>
+          <div class="field-body">
+            <div class="field">
+              <div class="control">
+                <input
+                  v-model="tags"
+                  class="input"
+                  type="text"
+                  placeholder="Tags to assign (comma-separated)"
+                />
+              </div>
             </div>
           </div>
         </div>
-      </div>
 
-      <table class="table is-fullwidth files-table" v-if="files.length">
-        <tr>
-          <th>Name</th>
-          <th>Size</th>
-          <th>Status</th>
-          <th></th>
-        </tr>
-        <tr v-for="file in files" :key="file.id">
-          <td>{{ file.file.name }}</td>
-          <td>{{ humanFileSize(file.file.size, true) }}</td>
-          <td>
-            <span v-if="file.status === 'loading'">In Progress</span>
-            <span v-else-if="file.status === true">Uploaded</span>
-            <span v-else-if="file.status === false">Error</span>
-          </td>
-          <td>
-            <button @click="removeFile(file)">&times;</button>
-          </td>
-        </tr>
-      </table>
+        <table class="table is-fullwidth files-table">
+          <tr>
+            <th>Name</th>
+            <th>Size</th>
+            <th>Status</th>
+            <th></th>
+          </tr>
+          <tr v-for="file in files" :key="file.id">
+            <td>{{ file.file.name }}</td>
+            <td>{{ humanFileSize(file.file.size, true) }}</td>
+            <td>
+              <span v-if="file.status === 'loading'">In Progress</span>
+              <span v-else-if="file.status === true">Uploaded</span>
+              <span v-else-if="file.status === false">Error</span>
+            </td>
+            <td>
+              <button @click="removeFile(file)">&times;</button>
+            </td>
+          </tr>
+        </table>
+      </template>
     </DropZone>
     <button
-      @click.prevent="uploadFiles(files)"
+      @click.prevent="uploadFiles(files, splitTags(tags))"
       class="button is-primary upload-button"
       :disabled="!files.length || !tags"
     >
@@ -91,6 +93,14 @@ const { files, addFiles, removeFile } = useFileList();
 
 const tags = ref<string>();
 
+function splitTags(tags: string): string[] {
+  tags = (tags || "").trim();
+  if (!tags.length) {
+    return [];
+  }
+  return tags.split(/\s*,\s*/);
+}
+
 function onInputChange(e: Event & { target: HTMLInputElement }) {
   addFiles(e.target.files);
   e.target.value = null; // reset so that selecting the same file again will still cause it to fire this change
@@ -102,43 +112,6 @@ import { ref } from "vue";
 
 const { uploadFiles } = createUploader();
 </script>
-
-<!--<style lang="css">
-html {
-  height: 100%;
-  width: 100%;
-  background-color: #b6d6f5;
-
-  /* Overlapping Stripes Background, based off https://codepen.io/MinzCode/pen/Exgpqpe */
-  &#45;&#45;color1: rgba(55, 165, 255, 0.35);
-  &#45;&#45;color2: rgba(96, 181, 250, 0.35);
-  &#45;&#45;rotation: 135deg;
-  &#45;&#45;size: 10px;
-  background-blend-mode: multiply;
-  background-image: repeating-linear-gradient(
-      var(&#45;&#45;rotation),
-      var(&#45;&#45;color1) calc(var(&#45;&#45;size) * 0),
-      var(&#45;&#45;color1) calc(var(&#45;&#45;size) * 9),
-      var(&#45;&#45;color2) calc(var(&#45;&#45;size) * 9),
-      var(&#45;&#45;color2) calc(var(&#45;&#45;size) * 12),
-      var(&#45;&#45;color1) calc(var(&#45;&#45;size) * 12)
-    ),
-    repeating-linear-gradient(
-      calc(var(&#45;&#45;rotation) + 90deg),
-      var(&#45;&#45;color1) calc(var(&#45;&#45;size) * 0),
-      var(&#45;&#45;color1) calc(var(&#45;&#45;size) * 9),
-      var(&#45;&#45;color2) calc(var(&#45;&#45;size) * 9),
-      var(&#45;&#45;color2) calc(var(&#45;&#45;size) * 12),
-      var(&#45;&#45;color1) calc(var(&#45;&#45;size) * 12)
-    );
-}
-
-body {
-  height: 100%;
-  margin: 0;
-  padding: 0;
-}
-</style>-->
 
 <style scoped lang="scss">
 #app {
