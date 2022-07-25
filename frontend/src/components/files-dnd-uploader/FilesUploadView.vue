@@ -28,7 +28,7 @@
                 @remove="removeFile"
               />
             </ul>-->
-      <table class="table is-fullwidth">
+      <table class="table is-fullwidth files-table">
         <tr>
           <th>Name</th>
           <th>Size</th>
@@ -126,6 +126,14 @@ body {
   display: flex;
   flex-direction: column;
   justify-content: center;
+
+  .files-table {
+    text-align: left;
+
+    td:last-child {
+      text-align: right;
+    }
+  }
 }
 
 .drop-area {
