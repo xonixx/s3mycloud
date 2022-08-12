@@ -2,17 +2,21 @@
 
 ## 1. List tags
 ```
-GET /api/tag?q=prefixOfName&limit=10
+GET /api/tag?q=prefixOfName&page=2&pageSize=10
 ```
+Returns sorted alphabetically
 
 ```json
-[
-  {
-    "id": "1",
-    "name": "tag1",
-    "color": "#ffeedd"
-  }
-]
+{
+  "page": [
+    {
+      "id": "1",
+      "name": "tag1",
+      "color": "#ffeedd"
+    }
+  ],
+  "total": 23
+}
 ```
 
 ## 2. Add tag
@@ -36,5 +40,17 @@ response (error):
 ```json
 {
     "error": "error description"
+}
+```
+
+## 3. Edit tag
+(Must pass all values)
+```
+PUT /api/tag
+
+{
+    "id": "ID",
+    "name": "newName",
+    "color": "#aabbcc"
 }
 ```
